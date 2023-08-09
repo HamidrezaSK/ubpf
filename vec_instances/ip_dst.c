@@ -26,7 +26,11 @@ static __u32 check_ipv6_rule(const struct IPv6Rule lookup, const struct ip6_hdr 
     if((ntohs(ipv6_header.ip6_src.s6_addr16[0]) == lookup.src_ip.s6_addr16[0])
     && (ntohs(ipv6_header.ip6_src.s6_addr16[1]) == lookup.src_ip.s6_addr16[1])
     && (ntohs(ipv6_header.ip6_src.s6_addr16[2]) == lookup.src_ip.s6_addr16[2])
-    && (ntohs(ipv6_header.ip6_src.s6_addr16[3]) == lookup.src_ip.s6_addr16[3]))
+    && (ntohs(ipv6_header.ip6_src.s6_addr16[3]) == lookup.src_ip.s6_addr16[3])
+    && (ntohs(ipv6_header.ip6_src.s6_addr16[4]) == lookup.src_ip.s6_addr16[4])
+    && (ntohs(ipv6_header.ip6_src.s6_addr16[5]) == lookup.src_ip.s6_addr16[5])
+    && (ntohs(ipv6_header.ip6_src.s6_addr16[6]) == lookup.src_ip.s6_addr16[6])
+    && (ntohs(ipv6_header.ip6_src.s6_addr16[7]) == lookup.src_ip.s6_addr16[7]))
         return 1;
     return 0;
 }
@@ -61,17 +65,15 @@ static void populate_ipv6_rule(struct IPv6Rule val[], size_t size)
 }
 
 uint64_t is_dst_one_one_one_one(void *opaque) {
-    // struct ipv6_header *ipv6_header = (struct ipv6_header*)opaque;
+    int sum = 0;
     struct ip6_hdr *ipv6_header = (struct ip6_hdr *)(opaque);
 
     struct IPv6Rule lookups[RULES_NUM];
     populate_ipv6_rule(lookups,RULES_NUM);
 
     for (size_t i = 0; i<RULES_NUM;i++)
-    {
-        
-    }
+        sum += check_ipv6_rule(lookups[i],*ipv6_header);
 
     // return 0;
-    return lookups[0].src_ip.s6_addr16[0];
+    return sum;
 }
