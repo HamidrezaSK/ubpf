@@ -38,13 +38,13 @@ static __u32 check_ipv6_rule(const struct IPv6Rule lookup, const struct ip6_hdr 
 static void populate_ipv6_rule(struct IPv6Rule val[], size_t size)
 {
         uint16_t addressBytes_0[8] = {
-        0x2001, 0x0db8, 0x85a3, 0x0000, 0x0000, 0x8a2e, 0x0370, 0x7334
+        0x2011, 0x0db7, 0x85b3, 0x8000, 0x5021, 0x8a2e, 0x0370, 0x7334
         };
         
         memcpy(val[0].src_ip.s6_addr16,addressBytes_0,sizeof(addressBytes_0));
 
         uint16_t addressBytes_1[8] = {
-        0x2001, 0x0db8, 0x85a3, 0x0000, 0x0000, 0x8a2e, 0x0370, 0x1234
+        0x2001, 0x0db8, 0x85a3, 0x0700, 0x0900, 0x8a1e, 0x1370, 0x1234
         };
         
         memcpy(val[1].src_ip.s6_addr16,addressBytes_1,sizeof(addressBytes_1));
@@ -56,7 +56,7 @@ static void populate_ipv6_rule(struct IPv6Rule val[], size_t size)
         memcpy(val[2].src_ip.s6_addr16,addressBytes_2,sizeof(addressBytes_2));
 
         uint16_t addressBytes_3[8] = {
-        0x2a03, 0x2880, 0xf21a, 0x83, 0xface, 0xb00b, 0x0370, 0x25de
+        0x2a03, 0x2880, 0xf21a, 0x83, 0xface, 0xb00b, 0x0360, 0x25de
         };
         
         memcpy(val[3].src_ip.s6_addr16,addressBytes_3,sizeof(addressBytes_3));
