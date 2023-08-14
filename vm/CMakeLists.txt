@@ -76,6 +76,8 @@ if(PLATFORM_LINUX)
 endif()
 
 if(UBPF_ENABLE_TESTS)
+  set_source_files_properties( test.c   ubpf_jit.c  ubpf_jit_x86_64.c  ubpf_jit_x86_64.h  ubpf_loader.c  ubpf_vm.c PROPERTIES COMPILE_FLAGS "-g")
+
   add_executable("ubpf_test"
     test.c
   )
