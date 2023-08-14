@@ -3,7 +3,7 @@ ip_dst.o:	file format elf64-bpf
 
 Disassembly of section .text:
 
-0000000000000000 <is_dst_one_one_one_one>:
+0000000000000000 <is_dst_one_one_one_one>:            ; Loading the input packet address from r1
        0:	71 12 17 00 00 00 00 00	r2 = *(u8 *)(r1 + 23)
        1:	67 02 00 00 08 00 00 00	r2 <<= 8
        2:	71 13 16 00 00 00 00 00	r3 = *(u8 *)(r1 + 22)
@@ -32,17 +32,17 @@ Disassembly of section .text:
       25:	71 14 09 00 00 00 00 00	r4 = *(u8 *)(r1 + 9)
       26:	67 04 00 00 08 00 00 00	r4 <<= 8
       27:	4f 74 00 00 00 00 00 00	r4 |= r7
-      28:	65 04 31 00 25 06 00 00	if r4 s> 1573 goto +49 <LBB0_3>
+      28:	65 04 31 00 25 06 00 00	if r4 s> 1573 goto +49 <LBB0_3>     ; Looking if the first section is bigger than 1573 to just check 1st and 3rd Address
       29:	b7 07 00 00 00 00 00 00	r7 = 0
       30:	7b 7a f8 ff 00 00 00 00	*(u64 *)(r10 - 8) = r7
-      31:	15 04 56 00 20 01 00 00	if r4 == 288 goto +86 <LBB0_13>
+      31:	15 04 56 00 20 01 00 00	if r4 == 288 goto +86 <LBB0_13>     ; Matching 2nd Address
       32:	b7 07 00 00 00 00 00 00	r7 = 0
       33:	b7 09 00 00 00 00 00 00	r9 = 0
-      34:	15 04 01 00 2a 03 00 00	if r4 == 810 goto +1 <LBB0_28>
-      35:	05 00 22 00 00 00 00 00	goto +34 <LBB0_35>
+      34:	15 04 01 00 2a 03 00 00	if r4 == 810 goto +1 <LBB0_28>      ; Matching 4th Address
+      35:	05 00 22 00 00 00 00 00	goto +34 <LBB0_35>                  ; failed to find any matches
 
 0000000000000120 <LBB0_28>:
-      36:	71 14 0a 00 00 00 00 00	r4 = *(u8 *)(r1 + 10)
+      36:	71 14 0a 00 00 00 00 00	r4 = *(u8 *)(r1 + 10)               ; Matching 4th address
       37:	71 11 0b 00 00 00 00 00	r1 = *(u8 *)(r1 + 11)
       38:	67 01 00 00 08 00 00 00	r1 <<= 8
       39:	4f 41 00 00 00 00 00 00	r1 |= r4
@@ -75,21 +75,21 @@ Disassembly of section .text:
       66:	57 02 00 00 ff ff 00 00	r2 &= 65535
       67:	b7 07 00 00 00 00 00 00	r7 = 0
       68:	b7 09 00 00 00 00 00 00	r9 = 0
-      69:	15 02 05 00 25 de 00 00	if r2 == 56869 goto +5 <LBB0_36>
+      69:	15 02 05 00 25 de 00 00	if r2 == 56869 goto +5 <LBB0_36>    ; if Success we have 1 in r0 and going to return it 
 
-0000000000000230 <LBB0_35>:
-      70:	0f 79 00 00 00 00 00 00	r9 += r7
+0000000000000230 <LBB0_35>:                     
+      70:	0f 79 00 00 00 00 00 00	r9 += r7                            ; Assumes the result is in r7 and r9 save them in r10 - 8 and goes to the last return lable
       71:	79 a1 f8 ff 00 00 00 00	r1 = *(u64 *)(r10 - 8)
       72:	0f 91 00 00 00 00 00 00	r1 += r9
       73:	7b 1a f8 ff 00 00 00 00	*(u64 *)(r10 - 8) = r1
       74:	b7 00 00 00 00 00 00 00	r0 = 0
 
-0000000000000258 <LBB0_36>:
+0000000000000258 <LBB0_36>:                                             ; return lable
       75:	79 a1 f8 ff 00 00 00 00	r1 = *(u64 *)(r10 - 8)
       76:	0f 10 00 00 00 00 00 00	r0 += r1
       77:	95 00 00 00 00 00 00 00	exit
 
-0000000000000270 <LBB0_3>:
+0000000000000270 <LBB0_3>:                                              ; Comparing 1st Address
       78:	15 04 48 00 26 06 00 00	if r4 == 1574 goto +72 <LBB0_20>
       79:	b7 07 00 00 00 00 00 00	r7 = 0
       80:	7b 7a f8 ff 00 00 00 00	*(u64 *)(r10 - 8) = r7
@@ -131,7 +131,7 @@ Disassembly of section .text:
      116:	b7 09 00 00 00 00 00 00	r9 = 0
      117:	05 00 d0 ff 00 00 00 00	goto -48 <LBB0_35>
 
-00000000000003b0 <LBB0_13>:
+00000000000003b0 <LBB0_13>:                                             ; Comparing 2nd Address      
      118:	71 14 0a 00 00 00 00 00	r4 = *(u8 *)(r1 + 10)
      119:	71 11 0b 00 00 00 00 00	r1 = *(u8 *)(r1 + 11)
      120:	67 01 00 00 08 00 00 00	r1 <<= 8
@@ -166,7 +166,7 @@ Disassembly of section .text:
      149:	15 02 17 00 12 34 00 00	if r2 == 13330 goto +23 <LBB0_27>
      150:	05 00 af ff 00 00 00 00	goto -81 <LBB0_35>
 
-00000000000004b8 <LBB0_20>:
+00000000000004b8 <LBB0_20>:                                             ; Comparing 3rd Address 
      151:	71 14 0a 00 00 00 00 00	r4 = *(u8 *)(r1 + 10)
      152:	71 17 0b 00 00 00 00 00	r7 = *(u8 *)(r1 + 11)
      153:	67 07 00 00 08 00 00 00	r7 <<= 8
@@ -190,7 +190,7 @@ Disassembly of section .text:
      171:	b7 09 00 00 00 00 00 00	r9 = 0
      172:	15 02 99 ff 19 46 00 00	if r2 == 17945 goto -103 <LBB0_35>
 
-0000000000000568 <LBB0_27>:
+0000000000000568 <LBB0_27>:                                             ; Assumes the result is in r1 and jumps to Lable 35
      173:	b7 02 00 00 00 00 00 00	r2 = 0
      174:	7b 2a f8 ff 00 00 00 00	*(u64 *)(r10 - 8) = r2
      175:	b7 07 00 00 00 00 00 00	r7 = 0
