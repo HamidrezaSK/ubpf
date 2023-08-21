@@ -1,0 +1,103 @@
+; ModuleID = 'hash.c'
+source_filename = "hash.c"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-linux-gnu"
+
+; Function Attrs: mustprogress nofree nosync nounwind uwtable willreturn
+define dso_local i64 @hash(i8* nocapture noundef readonly %0) local_unnamed_addr #0 {
+  %2 = getelementptr inbounds i8, i8* %0, i64 8
+  %3 = load i8, i8* %2, align 4, !tbaa.struct !5
+  %4 = getelementptr inbounds i8, i8* %0, i64 9
+  %5 = load i8, i8* %4, align 1, !tbaa.struct !9
+  %6 = getelementptr inbounds i8, i8* %0, i64 10
+  %7 = load i8, i8* %6, align 2, !tbaa.struct !10
+  %8 = getelementptr inbounds i8, i8* %0, i64 11
+  %9 = load i8, i8* %8, align 1, !tbaa.struct !11
+  %10 = getelementptr inbounds i8, i8* %0, i64 12
+  %11 = load i8, i8* %10, align 4, !tbaa.struct !12
+  %12 = getelementptr inbounds i8, i8* %0, i64 13
+  %13 = load i8, i8* %12, align 1, !tbaa.struct !13
+  %14 = getelementptr inbounds i8, i8* %0, i64 14
+  %15 = load i8, i8* %14, align 2, !tbaa.struct !14
+  %16 = getelementptr inbounds i8, i8* %0, i64 15
+  %17 = load i8, i8* %16, align 1, !tbaa.struct !15
+  %18 = getelementptr inbounds i8, i8* %0, i64 16
+  %19 = load i8, i8* %18, align 4, !tbaa.struct !16
+  %20 = getelementptr inbounds i8, i8* %0, i64 17
+  %21 = load i8, i8* %20, align 1, !tbaa.struct !17
+  %22 = getelementptr inbounds i8, i8* %0, i64 18
+  %23 = load i8, i8* %22, align 2, !tbaa.struct !18
+  %24 = getelementptr inbounds i8, i8* %0, i64 19
+  %25 = load i8, i8* %24, align 1, !tbaa.struct !19
+  %26 = getelementptr inbounds i8, i8* %0, i64 20
+  %27 = load i8, i8* %26, align 4, !tbaa.struct !20
+  %28 = getelementptr inbounds i8, i8* %0, i64 21
+  %29 = load i8, i8* %28, align 1, !tbaa.struct !21
+  %30 = getelementptr inbounds i8, i8* %0, i64 22
+  %31 = load i8, i8* %30, align 2, !tbaa.struct !22
+  %32 = getelementptr inbounds i8, i8* %0, i64 23
+  %33 = load i8, i8* %32, align 1, !tbaa.struct !23
+  %34 = zext i8 %3 to i64
+  %35 = zext i8 %5 to i64
+  %36 = add nuw nsw i64 %35, %34
+  %37 = zext i8 %7 to i64
+  %38 = add nuw nsw i64 %36, %37
+  %39 = zext i8 %9 to i64
+  %40 = add nuw nsw i64 %38, %39
+  %41 = zext i8 %11 to i64
+  %42 = add nuw nsw i64 %40, %41
+  %43 = zext i8 %13 to i64
+  %44 = add nuw nsw i64 %42, %43
+  %45 = zext i8 %15 to i64
+  %46 = add nuw nsw i64 %44, %45
+  %47 = zext i8 %17 to i64
+  %48 = add nuw nsw i64 %46, %47
+  %49 = zext i8 %19 to i64
+  %50 = add nuw nsw i64 %48, %49
+  %51 = zext i8 %21 to i64
+  %52 = add nuw nsw i64 %50, %51
+  %53 = zext i8 %23 to i64
+  %54 = add nuw nsw i64 %52, %53
+  %55 = zext i8 %25 to i64
+  %56 = add nuw nsw i64 %54, %55
+  %57 = zext i8 %27 to i64
+  %58 = add nuw nsw i64 %56, %57
+  %59 = zext i8 %29 to i64
+  %60 = add nuw nsw i64 %58, %59
+  %61 = zext i8 %31 to i64
+  %62 = add nuw nsw i64 %60, %61
+  %63 = zext i8 %33 to i64
+  %64 = add nuw nsw i64 %62, %63
+  %65 = mul nuw nsw i64 %64, 7936
+  ret i64 %65
+}
+
+attributes #0 = { mustprogress nofree nosync nounwind uwtable willreturn "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "tune-cpu"="generic" }
+
+!llvm.module.flags = !{!0, !1, !2, !3}
+!llvm.ident = !{!4}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{i32 7, !"PIC Level", i32 2}
+!2 = !{i32 7, !"PIE Level", i32 2}
+!3 = !{i32 7, !"uwtable", i32 1}
+!4 = !{!"Ubuntu clang version 14.0.0-1ubuntu1.1"}
+!5 = !{i64 0, i64 16, !6, i64 0, i64 16, !6, i64 0, i64 16, !6, i64 16, i64 16, !6, i64 16, i64 16, !6, i64 16, i64 16, !6}
+!6 = !{!7, !7, i64 0}
+!7 = !{!"omnipotent char", !8, i64 0}
+!8 = !{!"Simple C/C++ TBAA"}
+!9 = !{i64 0, i64 15, !6, i64 0, i64 15, !6, i64 0, i64 15, !6, i64 15, i64 16, !6, i64 15, i64 16, !6, i64 15, i64 16, !6}
+!10 = !{i64 0, i64 14, !6, i64 0, i64 14, !6, i64 0, i64 14, !6, i64 14, i64 16, !6, i64 14, i64 16, !6, i64 14, i64 16, !6}
+!11 = !{i64 0, i64 13, !6, i64 0, i64 13, !6, i64 0, i64 13, !6, i64 13, i64 16, !6, i64 13, i64 16, !6, i64 13, i64 16, !6}
+!12 = !{i64 0, i64 12, !6, i64 0, i64 12, !6, i64 0, i64 12, !6, i64 12, i64 16, !6, i64 12, i64 16, !6, i64 12, i64 16, !6}
+!13 = !{i64 0, i64 11, !6, i64 0, i64 11, !6, i64 0, i64 11, !6, i64 11, i64 16, !6, i64 11, i64 16, !6, i64 11, i64 16, !6}
+!14 = !{i64 0, i64 10, !6, i64 0, i64 10, !6, i64 0, i64 10, !6, i64 10, i64 16, !6, i64 10, i64 16, !6, i64 10, i64 16, !6}
+!15 = !{i64 0, i64 9, !6, i64 0, i64 9, !6, i64 0, i64 9, !6, i64 9, i64 16, !6, i64 9, i64 16, !6, i64 9, i64 16, !6}
+!16 = !{i64 0, i64 8, !6, i64 0, i64 8, !6, i64 0, i64 8, !6, i64 8, i64 16, !6, i64 8, i64 16, !6, i64 8, i64 16, !6}
+!17 = !{i64 0, i64 7, !6, i64 0, i64 7, !6, i64 0, i64 7, !6, i64 7, i64 16, !6, i64 7, i64 16, !6, i64 7, i64 16, !6}
+!18 = !{i64 0, i64 6, !6, i64 0, i64 6, !6, i64 0, i64 6, !6, i64 6, i64 16, !6, i64 6, i64 16, !6, i64 6, i64 16, !6}
+!19 = !{i64 0, i64 5, !6, i64 0, i64 5, !6, i64 0, i64 5, !6, i64 5, i64 16, !6, i64 5, i64 16, !6, i64 5, i64 16, !6}
+!20 = !{i64 0, i64 4, !6, i64 0, i64 4, !6, i64 0, i64 4, !6, i64 4, i64 16, !6, i64 4, i64 16, !6, i64 4, i64 16, !6}
+!21 = !{i64 0, i64 3, !6, i64 0, i64 3, !6, i64 0, i64 3, !6, i64 3, i64 16, !6, i64 3, i64 16, !6, i64 3, i64 16, !6}
+!22 = !{i64 0, i64 2, !6, i64 0, i64 2, !6, i64 0, i64 2, !6, i64 2, i64 16, !6, i64 2, i64 16, !6, i64 2, i64 16, !6}
+!23 = !{i64 0, i64 1, !6, i64 0, i64 1, !6, i64 0, i64 1, !6, i64 1, i64 16, !6, i64 1, i64 16, !6, i64 1, i64 16, !6}
