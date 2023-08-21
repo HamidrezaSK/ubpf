@@ -54,6 +54,13 @@ enum operand_size
     S64,
 };
 
+struct packed_load
+{
+    uint32_t start_loc;
+    uint32_t offset;
+    enum operand_size size;
+};
+
 struct jump
 {
     uint32_t offset_loc;

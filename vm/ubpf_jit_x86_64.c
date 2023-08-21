@@ -854,6 +854,147 @@ resolve_jumps(struct jit_state* state)
     }
 }
 
+static int
+analyse(struct ubpf_vm* vm)
+{
+    int i;
+    bool load_started = false;
+    int16_t started_offset = -1;
+    int load_reg = -1;
+    int load_reg2 = -1;
+    enum operand_size load_size;
+
+    for (i = 0; i < vm->num_insts; i++) {
+        struct ebpf_inst inst = ubpf_fetch_instruction(vm, i);
+        // state->pc_locs[i] = state->offset;
+        int dst = map_register(inst.dst);
+        int src = map_register(inst.src);
+
+
+        switch (inst.opcode) {
+        case EBPF_OP_OR64_REG:
+            if(!((src == load_reg2 && dst == load_reg) || (src == load_reg && dst == load_reg2)))
+                load_started = false;
+            load_reg = -1;
+            load_reg2 = -1;
+            break;
+
+        case EBPF_OP_LSH64_IMM:
+            if (dst != load_reg2 && dst != load_reg)
+                return -1; // determine what happens here
+            break;
+
+        case EBPF_OP_LDXW:
+            if(!load_started)
+            {
+                printf("we found a potential 32b packed load start at: %d \n",i);
+                load_started = true;
+                started_offset = i;
+                load_size = S32;
+                if(load_reg == -1)
+                    load_reg = dst;
+                else if(load_reg2 == -1)
+                    load_reg2 = dst;
+                else
+                    return -1;
+                // we need to initiate a new packed_load and determine the start and size
+            }
+            else if(load_size == S32)
+            {
+                // do we need this or no?
+                printf("This is the second 32b packed load at %d which started at %d \n",i,started_offset);
+                if(load_reg == -1)
+                    load_reg = dst;
+                else if(load_reg2 == -1)
+                    load_reg2 = dst;
+                else
+                    return -1;
+                
+            }
+            else
+                return -1; // TBD
+            // emit_load(state, S32, src, dst, i);
+            break;
+        case EBPF_OP_LDXH:
+            if(!load_started)
+            {
+                printf("we found a potential 16b packed load start at: %d \n",i);
+                load_started = true;
+                started_offset = i;
+                load_size = S16;
+                if(load_reg == -1)
+                    load_reg = dst;
+                else if(load_reg2 == -1)
+                    load_reg2 = dst;
+                else
+                    return -1;
+                // we need to initiate a new packed_load and determine the start and size
+            }
+            else if(load_size == S16)
+            {
+                // do we need this or no?
+                printf("This is the second 16b packed load at %d which started at %d\n",i,started_offset);
+                if(load_reg == -1)
+                    load_reg = dst;
+                else if(load_reg2 == -1)
+                    load_reg2 = dst;
+                else
+                    return -1;
+            }
+            else
+                return -1; // TBD
+            // emit_load(state, S16, src, dst, i);
+            break;
+        case EBPF_OP_LDXB:
+            if(!load_started)
+            {
+                printf("we found a potential 8b packed load start at: %d\n",i);
+                load_started = true;
+                started_offset = i;
+                load_size = S8;
+                if(load_reg == -1)
+                    load_reg = dst;
+                else if(load_reg2 == -1)
+                    load_reg2 = dst;
+                else
+                    return -1;
+                // we need to initiate a new packed_load and determine the start and size
+            }
+            else if(load_size == S8)
+            {
+                // do we need this or no?
+                printf("This is the second 8b packed load at %d which started at %d\n",i,started_offset);
+                if(load_reg == -1)
+                    load_reg = dst;
+                else if(load_reg2 == -1)
+                    load_reg2 = dst;
+                else
+                {
+                    load_started = false;
+                    load_reg = -1;
+                    load_reg2 = -1;
+                    started_offset = -1;
+                    load_size = -1;
+                }
+            }
+            else
+                return -1; // TBD
+            // emit_load(state, S8, src, dst, i);
+            break;
+
+        default:
+            load_started = false;
+            load_reg = -1;
+            load_reg2 = -1;
+            started_offset = -1;
+            load_size = -1;
+        }
+    }
+
+
+    return 0;
+}
+
 int
 ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg)
 {
@@ -866,6 +1007,10 @@ ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** 
     state.pc_locs = calloc(UBPF_MAX_INSTS + 1, sizeof(state.pc_locs[0]));
     state.jumps = calloc(UBPF_MAX_INSTS, sizeof(state.jumps[0]));
     state.num_jumps = 0;
+
+    if (analyse(vm) < 0) {
+        goto out;
+    }
 
     if (translate(vm, &state, errmsg) < 0) {
         goto out;
