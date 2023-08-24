@@ -61,6 +61,13 @@ struct packed_load
     enum operand_size size;
 };
 
+struct jump_ana
+{
+    uint32_t loc;
+    uint32_t target_pc;
+    uint32_t group;
+};
+
 struct jump
 {
     uint32_t offset_loc;
