@@ -91,6 +91,16 @@ static int register_map[REGISTER_MAP_SIZE] = {
 };
 #endif
 
+
+static int comp (const void * elem1, const void * elem2) 
+{
+    uint32_t f = *((uint32_t*)elem1);
+    uint32_t s = *((uint32_t*)elem2);
+    if (f > s) return  1;
+    if (f < s) return -1;
+    return 0;
+}
+
 /* Return the x86 register for the given eBPF register */
 static int
 map_register(int r)
@@ -854,6 +864,120 @@ resolve_jumps(struct jit_state* state)
     }
 }
 
+static bool is_duplicate(uint32_t num, uint32_t *array, size_t size) {
+    for (int i = 0; i < size; i++) {
+        if (array[i] == num) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static int get_group(const uint32_t sorted_targets[], size_t size, uint32_t pc)
+{
+    int i;
+    for (i=0;i<size-1;i++)
+    {
+        if(sorted_targets[i]<pc && sorted_targets[i+1]>pc)
+            return i;
+    }
+    return size - 1;  
+}
+
+static int
+analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps)
+{
+    int i;
+    uint32_t targets[UBPF_MAX_INSTS];
+    targets[0] = 0;
+    size_t target_index = 1;
+
+    int num_jumps = 0;
+    for (i = 0; i < vm->num_insts; i++) {
+        struct ebpf_inst inst = ubpf_fetch_instruction(vm, i);
+
+        uint32_t target_pc = i + inst.offset + 1;
+
+        switch (inst.opcode) {
+        case EBPF_OP_JNE_IMM:
+            if(!is_duplicate(target_pc, targets,target_index))
+            {
+                targets[target_index] = target_pc;
+                target_index++;
+            }
+            jumps[num_jumps].target_pc = target_pc;
+            jumps[num_jumps].loc = i;
+            num_jumps++;
+            break;
+        case EBPF_OP_JA:
+        case EBPF_OP_JEQ_IMM:
+        case EBPF_OP_JEQ_REG:
+        case EBPF_OP_JGT_IMM:
+        case EBPF_OP_JGT_REG:
+        case EBPF_OP_JGE_IMM:
+        case EBPF_OP_JGE_REG:
+        case EBPF_OP_JLT_IMM:
+        case EBPF_OP_JLT_REG:
+        case EBPF_OP_JLE_IMM:
+        case EBPF_OP_JLE_REG:
+        case EBPF_OP_JSET_IMM:
+        case EBPF_OP_JSET_REG:
+        case EBPF_OP_JNE_REG:
+        case EBPF_OP_JSGT_IMM:
+        case EBPF_OP_JSGT_REG:
+        case EBPF_OP_JSGE_IMM:
+        case EBPF_OP_JSGE_REG:
+        case EBPF_OP_JSLT_IMM:
+        case EBPF_OP_JSLT_REG:
+        case EBPF_OP_JSLE_IMM:
+        case EBPF_OP_JSLE_REG:
+        case EBPF_OP_JEQ32_IMM:
+        case EBPF_OP_JEQ32_REG:
+        case EBPF_OP_JGT32_IMM:
+        case EBPF_OP_JGT32_REG:
+        case EBPF_OP_JGE32_IMM:
+        case EBPF_OP_JGE32_REG:
+        case EBPF_OP_JLT32_IMM:
+        case EBPF_OP_JLT32_REG:
+        case EBPF_OP_JLE32_IMM:
+        case EBPF_OP_JLE32_REG:
+        case EBPF_OP_JSET32_IMM:
+        case EBPF_OP_JSET32_REG:
+        case EBPF_OP_JNE32_IMM:
+        case EBPF_OP_JNE32_REG:
+        case EBPF_OP_JSGT32_IMM:
+        case EBPF_OP_JSGT32_REG:
+        case EBPF_OP_JSGE32_IMM:
+        case EBPF_OP_JSGE32_REG:
+        case EBPF_OP_JSLT32_IMM:
+        case EBPF_OP_JSLT32_REG:
+        case EBPF_OP_JSLE32_IMM:
+        case EBPF_OP_JSLE32_REG:
+        case EBPF_OP_CALL:
+            if(!is_duplicate(target_pc, targets,target_index))
+            {
+                targets[target_index] = target_pc;
+                target_index++;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    qsort (targets, target_index, sizeof(*targets), comp);
+    // for (i = 0;i<target_index;i++)
+    // {
+    //     printf("Lable at %d \n",targets[i]);
+    // }
+    for(i = 0;i<num_jumps;i++)
+    // {
+        jumps[i].group = get_group(targets,target_index,jumps[i].loc);
+        // printf("Jump Found in %d, targetting %d, belongs to section %d\n",jumps[i].loc,jumps[i].target_pc,jumps[i].group);
+    // }
+
+    return 0;
+}
+
 static int
 analyse(struct ubpf_vm* vm)
 {
@@ -866,7 +990,6 @@ analyse(struct ubpf_vm* vm)
 
     for (i = 0; i < vm->num_insts; i++) {
         struct ebpf_inst inst = ubpf_fetch_instruction(vm, i);
-        // state->pc_locs[i] = state->offset;
         int dst = map_register(inst.dst);
         int src = map_register(inst.src);
 
@@ -887,7 +1010,7 @@ analyse(struct ubpf_vm* vm)
         case EBPF_OP_LDXW:
             if(!load_started)
             {
-                printf("we found a potential 32b packed load start at: %d \n",i);
+                // printf("we found a potential 32b packed load start at: %d \n",i);
                 load_started = true;
                 started_offset = i;
                 load_size = S32;
@@ -902,7 +1025,7 @@ analyse(struct ubpf_vm* vm)
             else if(load_size == S32)
             {
                 // do we need this or no?
-                printf("This is the second 32b packed load at %d which started at %d \n",i,started_offset);
+                // printf("This is the second 32b packed load at %d which started at %d \n",i,started_offset);
                 if(load_reg == -1)
                     load_reg = dst;
                 else if(load_reg2 == -1)
@@ -918,7 +1041,7 @@ analyse(struct ubpf_vm* vm)
         case EBPF_OP_LDXH:
             if(!load_started)
             {
-                printf("we found a potential 16b packed load start at: %d \n",i);
+                // printf("we found a potential 16b packed load start at: %d \n",i);
                 load_started = true;
                 started_offset = i;
                 load_size = S16;
@@ -933,7 +1056,7 @@ analyse(struct ubpf_vm* vm)
             else if(load_size == S16)
             {
                 // do we need this or no?
-                printf("This is the second 16b packed load at %d which started at %d\n",i,started_offset);
+                // printf("This is the second 16b packed load at %d which started at %d\n",i,started_offset);
                 if(load_reg == -1)
                     load_reg = dst;
                 else if(load_reg2 == -1)
@@ -948,7 +1071,7 @@ analyse(struct ubpf_vm* vm)
         case EBPF_OP_LDXB:
             if(!load_started)
             {
-                printf("we found a potential 8b packed load start at: %d\n",i);
+                // printf("we found a potential 8b packed load start at: %d\n",i);
                 load_started = true;
                 started_offset = i;
                 load_size = S8;
@@ -963,7 +1086,7 @@ analyse(struct ubpf_vm* vm)
             else if(load_size == S8)
             {
                 // do we need this or no?
-                printf("This is the second 8b packed load at %d which started at %d\n",i,started_offset);
+                // printf("This is the second 8b packed load at %d which started at %d\n",i,started_offset);
                 if(load_reg == -1)
                     load_reg = dst;
                 else if(load_reg2 == -1)
@@ -1008,7 +1131,13 @@ ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** 
     state.jumps = calloc(UBPF_MAX_INSTS, sizeof(state.jumps[0]));
     state.num_jumps = 0;
 
+    struct jump_ana* my_jne = calloc(UBPF_MAX_INSTS, sizeof(my_jne[0]));
+
     if (analyse(vm) < 0) {
+        goto out;
+    }
+
+    if (analyse_jmp(vm, my_jne) < 0) {
         goto out;
     }
 
