@@ -20,6 +20,7 @@
 
 #include <ubpf_config.h>
 
+#define TRIAL_NUM 1000000
 #define _GNU_SOURCE
 #include <inttypes.h>
 #include <time.h>
@@ -181,7 +182,6 @@ map_relocation_bounds_check_function(void* user_context, uint64_t addr, uint64_t
 int
 main(int argc, char** argv)
 {
-    clock_t begin = clock();
     struct option longopts[] = {
         {
             .name = "help",
@@ -325,6 +325,8 @@ load:
     }
 
     uint64_t ret;
+    double time_spent = 0;
+    int i;
 
     if (jit) {
         ubpf_jit_fn fn = ubpf_compile(vm, &errmsg);
@@ -334,20 +336,28 @@ load:
             free(mem);
             return 1;
         }
-        ret = fn(mem, mem_len);
+        for(i = 0; i < TRIAL_NUM ; ++i)
+        {
+            clock_t begin = clock();
+            ret = fn(mem, mem_len);
+            time_spent += (double)(clock() - begin) / CLOCKS_PER_SEC;
+        }
     } else {
-        if (ubpf_exec(vm, mem, mem_len, &ret) < 0)
-            ret = UINT64_MAX;
+        for(i = 0; i < TRIAL_NUM ; ++i)
+        {
+            clock_t begin = clock();
+            ubpf_exec(vm, mem, mem_len, &ret);
+            time_spent += (double)(clock() - begin) / CLOCKS_PER_SEC;
+        }
+        // if (ubpf_exec(vm, mem, mem_len, &ret) < 0)
+        //     ret = UINT64_MAX;
     }
 
     printf("0x%" PRIx64 "\n", ret);
 
     ubpf_destroy(vm);
     free(mem);
-
-    clock_t end = clock();
-    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    printf("Execution time: %f",time_spent);
+    printf("Average execution time: %.15f",time_spent/TRIAL_NUM);
     return 0;
 }
 
