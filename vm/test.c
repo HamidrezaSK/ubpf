@@ -22,6 +22,7 @@
 
 #define _GNU_SOURCE
 #include <inttypes.h>
+#include <time.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -180,6 +181,7 @@ map_relocation_bounds_check_function(void* user_context, uint64_t addr, uint64_t
 int
 main(int argc, char** argv)
 {
+    clock_t begin = clock();
     struct option longopts[] = {
         {
             .name = "help",
@@ -343,6 +345,9 @@ load:
     ubpf_destroy(vm);
     free(mem);
 
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("Execution time: %f",time_spent);
     return 0;
 }
 
