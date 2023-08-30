@@ -325,7 +325,7 @@ load:
     }
 
     uint64_t ret;
-    double time_spent = 0;
+    double time_spent;
     int i;
 
     if (jit) {
@@ -336,19 +336,16 @@ load:
             free(mem);
             return 1;
         }
+        clock_t begin = clock();
         for(i = 0; i < TRIAL_NUM ; ++i)
-        {
-            clock_t begin = clock();
             ret = fn(mem, mem_len);
-            time_spent += (double)(clock() - begin) / CLOCKS_PER_SEC;
-        }
+        time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
+
     } else {
+        clock_t begin = clock();
         for(i = 0; i < TRIAL_NUM ; ++i)
-        {
-            clock_t begin = clock();
             ubpf_exec(vm, mem, mem_len, &ret);
-            time_spent += (double)(clock() - begin) / CLOCKS_PER_SEC;
-        }
+        time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
         // if (ubpf_exec(vm, mem, mem_len, &ret) < 0)
         //     ret = UINT64_MAX;
     }
@@ -357,7 +354,7 @@ load:
 
     ubpf_destroy(vm);
     free(mem);
-    printf("Average execution time: %.15f",time_spent/TRIAL_NUM);
+    printf("Average execution time: %.15f",time_spent);
     return 0;
 }
 
