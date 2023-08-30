@@ -45,6 +45,10 @@
 #define R13 13
 #define R14 14
 #define R15 15
+#define XMM0 0
+#define XMM1 1
+
+
 
 enum operand_size
 {
@@ -54,11 +58,11 @@ enum operand_size
     S64,
 };
 
-struct packed_load
+struct packed_group
 {
-    uint32_t start_loc;
-    uint32_t offset;
-    enum operand_size size;
+    uint32_t section_id;                    // need this to connect the batches together. each compare group has a unique one
+    uint32_t end;                           // what is the last location, I am not sure if I need this or not
+    uint32_t size;                          // how many compares are in this group                    
 };
 
 struct jump_ana
@@ -250,6 +254,23 @@ emit_alu64(struct jit_state* state, int op, int src, int dst)
     emit_basic_rex(state, 1, src, dst);
     emit1(state, op);
     emit_modrm_reg2reg(state, src, dst);
+}
+
+static inline void
+emit_sse_alu64(struct jit_state* state, int p_op, int s_op, int src, int dst, int w)
+{
+    emit1(state, 0x66); // emit prefix
+    emit_basic_rex(state, w, src, dst);
+    emit1(state, p_op);
+    emit1(state, s_op);
+    emit_modrm_reg2reg(state, src, dst);
+}
+
+static inline void
+emit_sse_alu64_imm32(struct jit_state* state, int p_op, int s_op, int src, int dst, int32_t imm)
+{
+    emit_sse_alu64(state, p_op, s_op, src, dst, 0);
+    emit4(state, imm);
 }
 
 /* REX.W prefix, ModRM byte, and 32-bit immediate */
