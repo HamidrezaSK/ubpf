@@ -39,7 +39,7 @@
 static void
 muldivmod(struct jit_state* state, uint8_t opcode, int src, int dst, int32_t imm);
 
-#define REGISTER_MAP_SIZE 11
+#define REGISTER_MAP_SIZE 12
 
 /*
  * There are two common x86-64 calling conventions, as discussed at
@@ -75,7 +75,7 @@ static int register_map[REGISTER_MAP_SIZE] = {
 #else
 #define RCX_ALT R9
 static int platform_nonvolatile_registers[] = {RBP, RBX, R13, R14, R15};
-static int platform_parameter_registers[] = {RDI, RSI, RDX, RCX, R8, R9};
+static int platform_parameter_registers[] = {RDI, RSI, RDX, RCX, R8, R9, R10};
 static int register_map[REGISTER_MAP_SIZE] = {
     RAX,
     RDI,
@@ -88,6 +88,7 @@ static int register_map[REGISTER_MAP_SIZE] = {
     R14,
     R15,
     RBP,
+    R10,
 };
 #endif
 
@@ -203,8 +204,41 @@ ubpf_set_register_offset(int x)
     }
 }
 
+static bool is_valid_jmp(struct jump_ana *jumps, int loc, int size, struct jump_ana *jmp)
+{
+    int i;
+    for (i = 0; i<size; ++i)
+    {
+        if(jumps[i].loc == loc)
+        {
+            jmp->group = jumps[i].group;
+            jmp->loc = jumps[i].loc;
+            jmp->target_pc = jumps[i].target_pc;
+
+            return true; 
+        }
+    }
+    return false; 
+}
+
+static void get_jmp_group(const struct jump_ana jump, struct packed_group* groups, struct packed_group *group)
+{
+    int i;
+    for (i = 0; i< UBPF_MAX_INSTS;i++)
+    {
+        if(groups[i].section_id == jump.group)
+        {
+            group->end = groups[i].end;
+            group->size = groups[i].size;
+            group->section_id = groups[i].section_id;
+            break;
+        }
+    }
+}
+
+
 static int
-translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg)
+translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct jump_ana* jumps, struct packed_group* groups, int num_vec_jumps)
 {
     int i;
 
@@ -260,6 +294,10 @@ translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg)
      * after the eBPF program is finished executing.
      */
     emit_jmp(state, TARGET_PC_EXIT);
+
+    struct packed_group current_group = {-1,-1,-1};
+    int processed_index = 0;
+    struct jump_ana jmp = {-1,-1,-1};
 
     for (i = 0; i < vm->num_insts; i++) {
         struct ebpf_inst inst = ubpf_fetch_instruction(vm, i);
@@ -486,6 +524,34 @@ translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg)
             emit_jcc(state, 0x85, target_pc);
             break;
         case EBPF_OP_JNE_IMM:
+            if(is_valid_jmp(jumps, i, num_vec_jumps, &jmp))
+            {
+                // printf("Found a jump to change, in %d line, belongs to %d section and the index is %d\n",jmp.loc,jmp.group,processed_index);
+                // printf("Current group id is: [%"PRIu32"]\n",current_group.section_id);
+                if(processed_index == 0)
+                {
+                    
+                    get_jmp_group(jmp, groups, &current_group);
+                }
+                if(jmp.group == current_group.section_id && processed_index/4 < current_group.size/4)
+                {
+                    emit_load_imm(state, R10, inst.imm);    //move the immediate value to register r10 which is not being used by any other instruction in this assembly
+                    emit_sse_alu64_imm32(state, 0x0F, 0x72, 6, XMM0, 32);      //first we shift 32 bit to the left
+                    emit_sse_alu64(state, 0x0F, 0x6E, XMM0, R10, 1);           //then we load our value to xmm
+                    emit_sse_alu64_imm32(state, 0x0F, 0x72, 6, XMM1, 32);
+                    emit_sse_alu64(state, 0x0F, 0x6E, XMM1, dst, 1);
+                    if (processed_index%4 == 3)         // doing the jump only if we have a full 4 pack of loads
+                    {
+                    emit_sse_alu64(state, 0x0F, 0x2F, XMM1, XMM0, 0); //doing the comparison
+                    emit_jcc(state, 0x85, target_pc);
+                    }
+                    processed_index++;
+                    break;
+                }
+                else if (processed_index == current_group.size -1)
+                    processed_index = -1;
+                processed_index++;
+            }
             emit_cmp_imm32(state, dst, inst.imm);
             emit_jcc(state, 0x85, target_pc);
             break;
@@ -885,7 +951,7 @@ static int get_group(const uint32_t sorted_targets[], size_t size, uint32_t pc)
 }
 
 static int
-analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps)
+analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* groups, int *num_jump)
 {
     int i;
     uint32_t targets[UBPF_MAX_INSTS];
@@ -969,160 +1035,178 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps)
     // {
     //     printf("Lable at %d \n",targets[i]);
     // }
+    int group_index = -1;
+    int group_id;
+    groups[0].size = 0;
+    groups[0].section_id = -1;
     for(i = 0;i<num_jumps;i++)
-    // {
-        jumps[i].group = get_group(targets,target_index,jumps[i].loc);
-        // printf("Jump Found in %d, targetting %d, belongs to section %d\n",jumps[i].loc,jumps[i].target_pc,jumps[i].group);
-    // }
-
-    return 0;
-}
-
-static int
-analyse(struct ubpf_vm* vm)
-{
-    int i;
-    bool load_started = false;
-    int16_t started_offset = -1;
-    int load_reg = -1;
-    int load_reg2 = -1;
-    enum operand_size load_size;
-
-    for (i = 0; i < vm->num_insts; i++) {
-        struct ebpf_inst inst = ubpf_fetch_instruction(vm, i);
-        int dst = map_register(inst.dst);
-        int src = map_register(inst.src);
-
-
-        switch (inst.opcode) {
-        case EBPF_OP_OR64_REG:
-            if(!((src == load_reg2 && dst == load_reg) || (src == load_reg && dst == load_reg2)))
-                load_started = false;
-            load_reg = -1;
-            load_reg2 = -1;
-            break;
-
-        case EBPF_OP_LSH64_IMM:
-            if (dst != load_reg2 && dst != load_reg)
-                return -1; // determine what happens here
-            break;
-
-        case EBPF_OP_LDXW:
-            if(!load_started)
-            {
-                // printf("we found a potential 32b packed load start at: %d \n",i);
-                load_started = true;
-                started_offset = i;
-                load_size = S32;
-                if(load_reg == -1)
-                    load_reg = dst;
-                else if(load_reg2 == -1)
-                    load_reg2 = dst;
-                else
-                    return -1;
-                // we need to initiate a new packed_load and determine the start and size
-            }
-            else if(load_size == S32)
-            {
-                // do we need this or no?
-                // printf("This is the second 32b packed load at %d which started at %d \n",i,started_offset);
-                if(load_reg == -1)
-                    load_reg = dst;
-                else if(load_reg2 == -1)
-                    load_reg2 = dst;
-                else
-                    return -1;
-                
-            }
-            else
-                return -1; // TBD
-            // emit_load(state, S32, src, dst, i);
-            break;
-        case EBPF_OP_LDXH:
-            if(!load_started)
-            {
-                // printf("we found a potential 16b packed load start at: %d \n",i);
-                load_started = true;
-                started_offset = i;
-                load_size = S16;
-                if(load_reg == -1)
-                    load_reg = dst;
-                else if(load_reg2 == -1)
-                    load_reg2 = dst;
-                else
-                    return -1;
-                // we need to initiate a new packed_load and determine the start and size
-            }
-            else if(load_size == S16)
-            {
-                // do we need this or no?
-                // printf("This is the second 16b packed load at %d which started at %d\n",i,started_offset);
-                if(load_reg == -1)
-                    load_reg = dst;
-                else if(load_reg2 == -1)
-                    load_reg2 = dst;
-                else
-                    return -1;
-            }
-            else
-                return -1; // TBD
-            // emit_load(state, S16, src, dst, i);
-            break;
-        case EBPF_OP_LDXB:
-            if(!load_started)
-            {
-                // printf("we found a potential 8b packed load start at: %d\n",i);
-                load_started = true;
-                started_offset = i;
-                load_size = S8;
-                if(load_reg == -1)
-                    load_reg = dst;
-                else if(load_reg2 == -1)
-                    load_reg2 = dst;
-                else
-                    return -1;
-                // we need to initiate a new packed_load and determine the start and size
-            }
-            else if(load_size == S8)
-            {
-                // do we need this or no?
-                // printf("This is the second 8b packed load at %d which started at %d\n",i,started_offset);
-                if(load_reg == -1)
-                    load_reg = dst;
-                else if(load_reg2 == -1)
-                    load_reg2 = dst;
-                else
-                {
-                    load_started = false;
-                    load_reg = -1;
-                    load_reg2 = -1;
-                    started_offset = -1;
-                    load_size = -1;
-                }
-            }
-            else
-                return -1; // TBD
-            // emit_load(state, S8, src, dst, i);
-            break;
-
-        default:
-            load_started = false;
-            load_reg = -1;
-            load_reg2 = -1;
-            started_offset = -1;
-            load_size = -1;
+    {
+        group_id = get_group(targets,target_index,jumps[i].loc);
+        if (group_index == -1 || groups[group_index].section_id != group_id){
+            group_index++;
+            groups[group_index].section_id = group_id;
+            groups[group_index].size = 1;
         }
+        else{
+            groups[group_index].size++;
+        }
+        groups[group_index].end = jumps[i].loc;
+        
+        jumps[i].group = group_id;
+        // printf("Jump Found in %d, targetting %d, belongs to section %d\n",jumps[i].loc,jumps[i].target_pc,jumps[i].group);
     }
-
+    *num_jump = num_jumps;
+    // printf("total number of jumps found is:%d\n",*num_jump);
 
     return 0;
 }
+
+// static int
+// analyse(struct ubpf_vm* vm)
+// {
+//     int i;
+//     bool load_started = false;
+//     int16_t started_offset = -1;
+//     int load_reg = -1;
+//     int load_reg2 = -1;
+//     enum operand_size load_size;
+
+//     for (i = 0; i < vm->num_insts; i++) {
+//         struct ebpf_inst inst = ubpf_fetch_instruction(vm, i);
+//         int dst = map_register(inst.dst);
+//         int src = map_register(inst.src);
+
+
+//         switch (inst.opcode) {
+//         case EBPF_OP_OR64_REG:
+//             if(!((src == load_reg2 && dst == load_reg) || (src == load_reg && dst == load_reg2)))
+//                 load_started = false;
+//             load_reg = -1;
+//             load_reg2 = -1;
+//             break;
+
+//         case EBPF_OP_LSH64_IMM:
+//             if (dst != load_reg2 && dst != load_reg)
+//                 return -1; // determine what happens here
+//             break;
+
+//         case EBPF_OP_LDXW:
+//             if(!load_started)
+//             {
+//                 // printf("we found a potential 32b packed load start at: %d \n",i);
+//                 load_started = true;
+//                 started_offset = i;
+//                 load_size = S32;
+//                 if(load_reg == -1)
+//                     load_reg = dst;
+//                 else if(load_reg2 == -1)
+//                     load_reg2 = dst;
+//                 else
+//                     return -1;
+//                 // we need to initiate a new packed_load and determine the start and size
+//             }
+//             else if(load_size == S32)
+//             {
+//                 // do we need this or no?
+//                 // printf("This is the second 32b packed load at %d which started at %d \n",i,started_offset);
+//                 if(load_reg == -1)
+//                     load_reg = dst;
+//                 else if(load_reg2 == -1)
+//                     load_reg2 = dst;
+//                 else
+//                     return -1;
+                
+//             }
+//             else
+//                 return -1; // TBD
+//             // emit_load(state, S32, src, dst, i);
+//             break;
+//         case EBPF_OP_LDXH:
+//             if(!load_started)
+//             {
+//                 // printf("we found a potential 16b packed load start at: %d \n",i);
+//                 load_started = true;
+//                 started_offset = i;
+//                 load_size = S16;
+//                 if(load_reg == -1)
+//                     load_reg = dst;
+//                 else if(load_reg2 == -1)
+//                     load_reg2 = dst;
+//                 else
+//                     return -1;
+//                 // we need to initiate a new packed_load and determine the start and size
+//             }
+//             else if(load_size == S16)
+//             {
+//                 // do we need this or no?
+//                 // printf("This is the second 16b packed load at %d which started at %d\n",i,started_offset);
+//                 if(load_reg == -1)
+//                     load_reg = dst;
+//                 else if(load_reg2 == -1)
+//                     load_reg2 = dst;
+//                 else
+//                     return -1;
+//             }
+//             else
+//                 return -1; // TBD
+//             // emit_load(state, S16, src, dst, i);
+//             break;
+//         case EBPF_OP_LDXB:
+//             if(!load_started)
+//             {
+//                 // printf("we found a potential 8b packed load start at: %d\n",i);
+//                 load_started = true;
+//                 started_offset = i;
+//                 load_size = S8;
+//                 if(load_reg == -1)
+//                     load_reg = dst;
+//                 else if(load_reg2 == -1)
+//                     load_reg2 = dst;
+//                 else
+//                     return -1;
+//                 // we need to initiate a new packed_load and determine the start and size
+//             }
+//             else if(load_size == S8)
+//             {
+//                 // do we need this or no?
+//                 // printf("This is the second 8b packed load at %d which started at %d\n",i,started_offset);
+//                 if(load_reg == -1)
+//                     load_reg = dst;
+//                 else if(load_reg2 == -1)
+//                     load_reg2 = dst;
+//                 else
+//                 {
+//                     load_started = false;
+//                     load_reg = -1;
+//                     load_reg2 = -1;
+//                     started_offset = -1;
+//                     load_size = -1;
+//                 }
+//             }
+//             else
+//                 return -1; // TBD
+//             // emit_load(state, S8, src, dst, i);
+//             break;
+
+//         default:
+//             load_started = false;
+//             load_reg = -1;
+//             load_reg2 = -1;
+//             started_offset = -1;
+//             load_size = -1;
+//         }
+//     }
+
+
+//     return 0;
+// }
 
 int
 ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg)
 {
     struct jit_state state;
     int result = -1;
+    int num_vec_jumps = 0;
 
     state.offset = 0;
     state.size = *size;
@@ -1132,16 +1216,17 @@ ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** 
     state.num_jumps = 0;
 
     struct jump_ana* my_jne = calloc(UBPF_MAX_INSTS, sizeof(my_jne[0]));
+    struct packed_group* groups = calloc(UBPF_MAX_INSTS, sizeof(groups[0]));
 
-    if (analyse(vm) < 0) {
+    // if (analyse(vm) < 0) {
+    //     goto out;
+    // }
+
+    if (analyse_jmp(vm, my_jne, groups, &num_vec_jumps) < 0) {
         goto out;
     }
 
-    if (analyse_jmp(vm, my_jne) < 0) {
-        goto out;
-    }
-
-    if (translate(vm, &state, errmsg) < 0) {
+    if (translate(vm, &state, errmsg, my_jne, groups, num_vec_jumps) < 0) {
         goto out;
     }
 
