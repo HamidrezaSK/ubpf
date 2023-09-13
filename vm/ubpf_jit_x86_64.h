@@ -47,6 +47,9 @@
 #define R15 15
 #define XMM0 0
 #define XMM1 1
+#define XMM2 2
+#define XMM3 3
+
 
 
 
@@ -70,6 +73,12 @@ struct jump_ana
     uint32_t loc;
     uint32_t target_pc;
     uint32_t group;
+};
+
+struct load
+{
+    int addr_offset;
+    int inst_offset;
 };
 
 struct jump
