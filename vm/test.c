@@ -325,7 +325,7 @@ load:
     }
 
     uint64_t ret;
-    double time_spent;
+    double time_spent = 0;
     int i;
 
     if (jit) {
@@ -337,9 +337,11 @@ load:
             return 1;
         }
         clock_t begin = clock();
-        for(i = 0; i < TRIAL_NUM ; ++i)
+
+        for(i = 0; i < TRIAL_NUM ; ++i){
             ret = fn(mem, mem_len);
-        time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
+        }
+        time_spent += (double)(clock() - begin) / CLOCKS_PER_SEC;
 
     } else {
         clock_t begin = clock();

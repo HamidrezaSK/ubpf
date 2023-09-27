@@ -247,7 +247,7 @@ ubpf_set_register_offset(int x)
 
 
 static int
-translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct load* loads/*, struct jump_ana* jumps, struct packed_group* groups, int num_vec_jumps*/)
+translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct load* loads, struct packed_group* groups, int num_groups)
 {
     int i;
     int load_count = 0;
@@ -306,7 +306,8 @@ translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct loa
     emit_jmp(state, TARGET_PC_EXIT);
 
     // struct packed_group current_group = {-1,-1,-1};
-    // int processed_index = 0;
+    int processed_index = 0;
+    bool in_packed_section = false;
     // struct jump_ana jmp = {-1,-1,-1};     
 
     for (i = 0; i < vm->num_insts; i++) {
@@ -316,8 +317,6 @@ translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct loa
         int dst = map_register(inst.dst);
         int src = map_register(inst.src);
         uint32_t target_pc = i + inst.offset + 1;
-
-
 
         if (i == 0 || vm->int_funcs[i]) {
             /* When we are the subject of a call, we have to properly align our
@@ -363,20 +362,20 @@ translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct loa
             emit1(state,0xdb);
             
             emit1(state,0xc5);      //merge xmm2 and xmm3 to xmm2
-            emit1(state,0xf9);
+            emit1(state,0xe9);
             emit1(state,0x6c);
-            emit1(state,0xc1);
+            emit1(state,0xd3);
             
         }
 
         if(i == loads[load_count].inst_offset )
         {
 
-            emit1(state, 0xf3);
+            emit1(state, 0xf3);                 // movdqu xmmX, xmmword ptr[src+offset]
             emit_basic_rex(state,0,0,src);
             emit1(state, 0x0f);
             emit1(state, 0x6f);
-            emit_modrm_and_displacement(state, 0, src, inst.offset);
+            emit_modrm_and_displacement(state, load_count!=0, src, inst.offset);
 
             if(load_count == 0)
             {
@@ -388,6 +387,39 @@ translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct loa
                 emit1(state,0xc2);
             }
             load_count++;
+        }
+        if(processed_index < num_groups && !in_packed_section && groups[processed_index].start == i)
+        {
+            in_packed_section = true;
+            emit_sse_alu64(state, 0x0F, 0x76, XMM1, XMM0, 0); //doing the comparison
+
+            emit1(state,0x66);      //move xmm1 to r11d
+            emit1(state,0x44);
+            emit1(state,0x0f);
+            emit1(state,0xd7);
+            emit1(state,0xd9);
+
+            emit1(state,0x41);      //compare r11d to 0xffff
+            emit1(state,0x81);
+            emit1(state,0xfb);
+            emit1(state,0xff);
+            emit1(state,0xff);
+            emit1(state,0x00);
+            emit1(state,0x00);
+
+            emit_jcc(state, 0x85, target_pc);
+            continue;
+        }
+        else if(in_packed_section)
+        {
+            if (groups[processed_index].end == i)
+            {
+                in_packed_section = false;
+                ++processed_index;
+                continue;
+            }
+            else if(inst.opcode != EBPF_OP_LDDW)
+                continue;
         }
         switch (inst.opcode) {
         case EBPF_OP_ADD_IMM:
@@ -1026,7 +1058,7 @@ static int get_group(const uint32_t sorted_targets[], size_t size, uint32_t pc)
 }
 
 static int
-analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* groups, int *num_jump)
+analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* groups, int *num_groups)
 {
     int i;
     uint32_t targets[UBPF_MAX_INSTS];
@@ -1106,10 +1138,10 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
         }
     }
     qsort (targets, target_index, sizeof(*targets), comp);
-    for (i = 0;i<target_index;i++)
-    {
-        printf("Lable at %d \n",targets[i]);
-    }
+    // for (i = 0;i<target_index;i++)
+    // {
+    //     printf("Lable at %d \n",targets[i]);
+    // }
     int group_index = -1;
     int group_id;
     groups[0].size = 0;
@@ -1121,6 +1153,7 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
             group_index++;
             groups[group_index].section_id = group_id;
             groups[group_index].size = 1;
+            groups[group_index].start = jumps[i].loc;
         }
         else{
             groups[group_index].size++;
@@ -1128,10 +1161,9 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
         groups[group_index].end = jumps[i].loc;
         
         jumps[i].group = group_id;
-        printf("Jump Found in %d, targetting %d, belongs to section %d\n",jumps[i].loc,jumps[i].target_pc,jumps[i].group);
     }
-    *num_jump = num_jumps;
-    printf("total number of jumps found is:%d\n",*num_jump);
+    *num_groups = group_index + 1;
+
 
     return 0;
 }
@@ -1274,7 +1306,7 @@ ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** 
 {
     struct jit_state state;
     int result = -1;
-    int num_vec_jumps = 0;
+    int num_groups = 0;
     int num_vec_loads = 0;
 
 
@@ -1293,11 +1325,11 @@ ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** 
         goto out;
     }
 
-    if (analyse_jmp(vm, my_jne, groups, &num_vec_jumps) < 0) {
+    if (analyse_jmp(vm, my_jne, groups, &num_groups) < 0) {
         goto out;
     }
 
-    if (translate(vm, &state, errmsg, packed_loads/*, my_jne, groups, num_vec_jumps*/) < 0) {
+    if (translate(vm, &state, errmsg, packed_loads, groups, num_groups) < 0) {
         goto out;
     }
 
@@ -1317,6 +1349,9 @@ ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** 
     *size = state.offset;
 
 out:
+    free(my_jne);
+    free(groups);
+    free(packed_loads);
     free(state.pc_locs);
     free(state.jumps);
     return result;
