@@ -74,7 +74,7 @@ uint64_t is_dst_one_one_one_one(void *opaque, void *r) {
 int main()
 {
     size_t mem_len = 0;
-    srand(time(NULL));
+    // srand(time(NULL));
     
     void* mem = readfile("ipv6_in.mem", 1024 * 1024, &mem_len);
     void* r_mem = readfile("rule_in.mem", 1024 * 1024, &mem_len);
