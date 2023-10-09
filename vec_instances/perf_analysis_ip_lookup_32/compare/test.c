@@ -66,16 +66,8 @@ uint64_t is_dst_one_one_one_one(void *opaque, void *r) {
     struct ip6_hdr *ipv6_headers = (struct ip6_hdr *)(opaque);
     struct ip6_hdr *lookups = (struct ip6_hdr *)(r);
     for (int i=0; i<BATCH_SIZE; ++i)
-    {
-        int index = 0;
-        while (check[index])
-        {
-            index = rand() % BATCH_SIZE;
-        }
-        check[index] = true;
         for (int j = 0; j<RULES_NUM;++j)
-            sum += check_ipv6_rule(lookups[j],ipv6_headers[index]);
-    }
+            sum += check_ipv6_rule(lookups[j],ipv6_headers[i]);
     return sum;
 }
 
