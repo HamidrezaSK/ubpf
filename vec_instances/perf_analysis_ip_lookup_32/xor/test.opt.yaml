@@ -1,0 +1,1428 @@
+--- !Passed
+Pass:            loop-unroll
+Name:            FullyUnrolled
+DebugLoc:        { File: test.c, Line: 55, Column: 5 }
+Function:        check_ipv6_rule
+Args:
+  - String:          'completely unrolled loop with '
+  - UnrollCount:     '4'
+  - String:          ' iterations'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          ''''
+  - Callee:          check_ipv6_rule
+  - String:          ''' inlined into '''
+  - Caller:          is_dst_one_one_one_one
+    DebugLoc:        { File: test.c, Line: 62, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '-15085'
+  - String:          ', threshold='
+  - Threshold:       '337'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          is_dst_one_one_one_one
+  - String:          ':'
+  - Line:            '7'
+  - String:          ':'
+  - Column:          '20'
+  - String:          ';'
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: test.c, Line: 69, Column: 47 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'hoisting '
+  - Inst:            zext
+    DebugLoc:        { File: test.c, Line: 69, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'hoisting '
+  - Inst:            getelementptr
+    DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'hoisting '
+  - Inst:            load
+    DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'hoisting '
+  - Inst:            getelementptr
+    DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'hoisting '
+  - Inst:            load
+    DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'hoisting '
+  - Inst:            getelementptr
+    DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'hoisting '
+  - Inst:            load
+    DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'hoisting '
+  - Inst:            getelementptr
+    DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'hoisting '
+  - Inst:            load
+    DebugLoc:        { File: test.c, Line: 69, Column: 20 }
+...
+--- !Passed
+Pass:            loop-unroll
+Name:            FullyUnrolled
+DebugLoc:        { File: test.c, Line: 67, Column: 5 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'completely unrolled loop with '
+  - UnrollCount:     '4'
+  - String:          ' iterations'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 33, Column: 12 }
+Function:        readfile
+Args:
+  - Callee:          fopen
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: test.c, Line: 30, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 36, Column: 18 }
+Function:        readfile
+Args:
+  - Callee:          calloc
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: test.c, Line: 30, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 39, Column: 18 }
+Function:        readfile
+Args:
+  - Callee:          fread
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: test.c, Line: 30, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 43, Column: 5 }
+Function:        readfile
+Args:
+  - Callee:          fclose
+    DebugLoc:        { File: '/usr/include/stdio.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: test.c, Line: 30, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 33, Column: 12 }
+Function:        readfile
+Args:
+  - Callee:          fopen
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: test.c, Line: 30, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 36, Column: 18 }
+Function:        readfile
+Args:
+  - Callee:          calloc
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: test.c, Line: 30, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 39, Column: 18 }
+Function:        readfile
+Args:
+  - Callee:          fread
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: test.c, Line: 30, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 43, Column: 5 }
+Function:        readfile
+Args:
+  - Callee:          fclose
+    DebugLoc:        { File: '/usr/include/stdio.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: test.c, Line: 30, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: test.c, Line: 39, Column: 5 }
+Function:        readfile
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: test.c, Line: 39, Column: 18 }
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 82, Column: 5 }
+Function:        main
+Args:
+  - Callee:          printf
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: test.c, Line: 74, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: test.c, Line: 82, Column: 5 }
+Function:        main
+Args:
+  - Callee:          printf
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: test.c, Line: 74, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: test.c, Line: 77, Column: 17 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          readfile
+    DebugLoc:        { File: test.c, Line: 30, Column: 0 }
+  - String:          ''' inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: test.c, Line: 74, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '145'
+  - String:          ', threshold='
+  - Threshold:       '225'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          main
+  - String:          ':'
+  - Line:            '4'
+  - String:          ':'
+  - Column:          '17'
+  - String:          ';'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: test.c, Line: 78, Column: 19 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          readfile
+  - String:          ''' inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: test.c, Line: 74, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '-14855'
+  - String:          ', threshold='
+  - Threshold:       '225'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          main
+  - String:          ':'
+  - Line:            '5'
+  - String:          ':'
+  - Column:          '19'
+  - String:          ';'
+...
+--- !Missed
+Pass:            inline
+Name:            TooCostly
+DebugLoc:        { File: test.c, Line: 81, Column: 16 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          is_dst_one_one_one_one
+    DebugLoc:        { File: test.c, Line: 62, Column: 0 }
+  - String:          ''' not inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: test.c, Line: 74, Column: 0 }
+  - String:          ''' because too costly to inline '
+  - String:          '(cost='
+  - Cost:            '465'
+  - String:          ', threshold='
+  - Threshold:       '225'
+  - String:          ')'
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: test.c, Line: 39, Column: 5 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: test.c, Line: 39, Column: 18 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: test.c, Line: 39, Column: 5 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: test.c, Line: 39, Column: 18 }
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            InterleavingNotBeneficial
+DebugLoc:        { File: test.c, Line: 68, Column: 9 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          the cost-model indicates that interleaving is not beneficial
+...
+--- !Passed
+Pass:            loop-vectorize
+Name:            Vectorized
+DebugLoc:        { File: test.c, Line: 68, Column: 9 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'vectorized loop (vectorization width: '
+  - VectorizationFactor: '4'
+  - String:          ', interleaved count: '
+  - InterleaveCount: '1'
+  - String:          ')'
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            InterleavingNotBeneficial
+DebugLoc:        { File: test.c, Line: 68, Column: 9 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          the cost-model indicates that interleaving is not beneficial
+...
+--- !Passed
+Pass:            loop-vectorize
+Name:            Vectorized
+DebugLoc:        { File: test.c, Line: 68, Column: 9 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'vectorized loop (vectorization width: '
+  - VectorizationFactor: '4'
+  - String:          ', interleaved count: '
+  - InterleaveCount: '1'
+  - String:          ')'
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            InterleavingNotBeneficial
+DebugLoc:        { File: test.c, Line: 68, Column: 9 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          the cost-model indicates that interleaving is not beneficial
+...
+--- !Passed
+Pass:            loop-vectorize
+Name:            Vectorized
+DebugLoc:        { File: test.c, Line: 68, Column: 9 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'vectorized loop (vectorization width: '
+  - VectorizationFactor: '4'
+  - String:          ', interleaved count: '
+  - InterleaveCount: '1'
+  - String:          ')'
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            InterleavingNotBeneficial
+DebugLoc:        { File: test.c, Line: 68, Column: 9 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          the cost-model indicates that interleaving is not beneficial
+...
+--- !Passed
+Pass:            loop-vectorize
+Name:            Vectorized
+DebugLoc:        { File: test.c, Line: 68, Column: 9 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'vectorized loop (vectorization width: '
+  - VectorizationFactor: '4'
+  - String:          ', interleaved count: '
+  - InterleaveCount: '1'
+  - String:          ')'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 56, Column: 15 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            UnsupportedType
+DebugLoc:        { File: test.c, Line: 68, Column: 37 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'Cannot SLP vectorize list: type '
+  - String:          '<4 x i32> is unsupported by vectorizer'
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            NonReductionValueUsedOutsideLoop
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          value that could not be identified as reduction is used outside the loop
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantComputeNumberOfIterations
+DebugLoc:        { File: test.c, Line: 39, Column: 5 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          could not determine number of loop iterations
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: test.c, Line: 39, Column: 5 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            NonReductionValueUsedOutsideLoop
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          value that could not be identified as reduction is used outside the loop
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantComputeNumberOfIterations
+DebugLoc:        { File: test.c, Line: 39, Column: 5 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          could not determine number of loop iterations
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: test.c, Line: 39, Column: 5 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: test.c, Line: 39, Column: 5 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: test.c, Line: 39, Column: 18 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: test.c, Line: 39, Column: 5 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: test.c, Line: 39, Column: 18 }
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: test.c, Line: 62, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - NumStackBytes:   '0'
+  - String:          ' stack bytes in function'
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '11'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '40'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '16'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '40'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '16'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '40'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '16'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '40'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '7'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: test.c, Line: 62, Column: 0 }
+Function:        is_dst_one_one_one_one
+Args:
+  - NumInstructions: '226'
+  - String:          ' instructions in function'
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: test.c, Line: 74, Column: 0 }
+Function:        main
+Args:
+  - NumStackBytes:   '40'
+  - String:          ' stack bytes in function'
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '14'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '9'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '11'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '9'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: test.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '16'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: test.c, Line: 74, Column: 0 }
+Function:        main
+Args:
+  - NumInstructions: '59'
+  - String:          ' instructions in function'
+...

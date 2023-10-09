@@ -1,0 +1,860 @@
+
+<html>
+<title>test.c</title>
+<meta charset="utf-8" />
+<head>
+<link rel='stylesheet' type='text/css' href='style.css'>
+<script type="text/javascript">
+/* Simple helper to show/hide the expanded message of a remark. */
+function toggleExpandedMessage(e) {
+  var FullTextElems = e.parentElement.parentElement.getElementsByClassName("full-info");
+  if (!FullTextElems || FullTextElems.length < 1) {
+      return false;
+  }
+  var FullText = FullTextElems[0];
+  if (FullText.style.display == 'none') {
+    e.innerHTML = '-';
+    FullText.style.display = 'block';
+  } else {
+    e.innerHTML = '+';
+    FullText.style.display = 'none';
+  }
+}
+</script>
+</head>
+<body>
+<div class="centered">
+<table class="source">
+<thead>
+<tr>
+<th style="width: 2%">Line</td>
+<th style="width: 3%">Hotness</td>
+<th style="width: 10%">Optimization</td>
+<th style="width: 70%">Source</td>
+<th style="width: 15%">Inline Context</td>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+<td><a name="L1">1</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;linux/bpf.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L2">2</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;arpa/inet.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L3">3</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdint.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L4">4</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L5">5</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;netinet/ip6.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L6">6</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;bpf/bpf_endian.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L7">7</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L8">8</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L9">9</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;time.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L10">10</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdbool.h&gt;</span><span class="cp"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L11">11</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L12">12</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#define RULES_NUM 32</span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L13">13</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="cp">#define BATCH_SIZE 4</span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L14">14</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L15">15</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="k">struct</span><span class="w"> </span><span class="nc">IPv6Rule</span><span class="w"> </span><span class="p">{</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L16">16</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">in6_addr</span><span class="w"> </span><span class="n">src_ip</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L17">17</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">in6_addr</span><span class="w"> </span><span class="n">src_ip_wildcard_mask</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L18">18</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">in6_addr</span><span class="w"> </span><span class="n">dst_ip</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L19">19</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">in6_addr</span><span class="w"> </span><span class="n">dst_ip_wildcard_mask</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L20">20</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="n">__be16</span><span class="w"> </span><span class="n">min_src_port</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L21">21</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="n">__be16</span><span class="w"> </span><span class="n">max_src_port</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L22">22</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="n">__be16</span><span class="w"> </span><span class="n">min_dst_port</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L23">23</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="n">__be16</span><span class="w"> </span><span class="n">max_dst_port</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L24">24</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="n">__u8</span><span class="w"> </span><span class="n">protocol</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L25">25</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="n">_Bool</span><span class="w"> </span><span class="n">allow</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L26">26</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="p">};</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L27">27</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L28">28</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="k">static</span><span class="w"> </span><span class="kt">void</span><span class="o">*</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L29">29</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="nf">readfile</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">maxlen</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="o">*</span><span class="w"> </span><span class="n">len</span><span class="p">)</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L30">30</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="p">{</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L31">31</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">FILE</span><span class="o">*</span><span class="w"> </span><span class="n">file</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L32">32</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L33">33</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fopen</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;r&quot;</span><span class="p">);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">inline</td>
+<td><pre style="display:inline">           </pre><span class="column-entry-yellow"> fopen will not be inlined into readfile because its definition is unavailable&nbsp;</span></td>
+<td class="column-entry-yellow">readfile</td>
+</tr>
+
+<tr>
+<td><a name="L34">34</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L35">35</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L36">36</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calloc</span><span class="p">(</span><span class="n">maxlen</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">inline</td>
+<td><pre style="display:inline">                 </pre><span class="column-entry-yellow"> calloc will not be inlined into readfile because its definition is unavailable&nbsp;</span></td>
+<td class="column-entry-yellow">readfile</td>
+</tr>
+
+<tr>
+<td><a name="L37">37</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L38">38</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">rv</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L39">39</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">((</span><span class="n">rv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fread</span><span class="p">(</span><span class="n">data</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">maxlen</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="n">file</span><span class="p">))</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">inline</td>
+<td><pre style="display:inline">                 </pre><span class="column-entry-yellow"> fread will not be inlined into readfile because its definition is unavailable&nbsp;</span></td>
+<td class="column-entry-yellow">readfile</td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">TTI</td>
+<td><pre style="display:inline">    </pre><span class="column-entry-yellow"> advising against unrolling the loop because it contains a <a href="test.c.html#L39">call</a>&nbsp;</span></td>
+<td class="column-entry-yellow">readfile</td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">TTI</td>
+<td><pre style="display:inline">    </pre><span class="column-entry-yellow"> advising against unrolling the loop because it contains a <a href="test.c.html#L39">call</a>&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L72">main</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-white">loop-vectorize</td>
+<td><pre style="display:inline">    </pre><span class="column-entry-yellow"> loop not vectorized: could not determine number of loop iterations&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L72">main</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">loop-vectorize</td>
+<td><pre style="display:inline">    </pre><span class="column-entry-yellow"> loop not vectorized&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L72">main</a></td>
+</tr>
+
+<tr>
+<td><a name="L40">40</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">        </span><span class="n">offset</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">rv</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L41">41</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="p">}</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L42">42</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L43">43</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="n">fclose</span><span class="p">(</span><span class="n">file</span><span class="p">);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">inline</td>
+<td><pre style="display:inline">    </pre><span class="column-entry-yellow"> <a href="_usr_include_stdio.h.html#L0">fclose</a> will not be inlined into readfile because its definition is unavailable&nbsp;</span></td>
+<td class="column-entry-yellow">readfile</td>
+</tr>
+
+<tr>
+<td><a name="L44">44</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">len</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L45">45</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">        </span><span class="o">*</span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">offset</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L46">46</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="p">}</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L47">47</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L48">48</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="p">}</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L49">49</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L50">50</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L51">51</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="k">static</span><span class="w"> </span><span class="n">__u32</span><span class="w"> </span><span class="nf">check_ipv6_rule</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ip6_hdr</span><span class="w"> </span><span class="n">lookup</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">ip6_hdr</span><span class="w"> </span><span class="n">ipv6_header</span><span class="p">)</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L52">52</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="p">{</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L53">53</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L54">54</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L55">55</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">loop-unroll</td>
+<td><pre style="display:inline">    </pre><span class="column-entry-yellow"> completely unrolled loop with 4 iterations&nbsp;</span></td>
+<td class="column-entry-yellow">check_ipv6_rule</td>
+</tr>
+
+<tr>
+<td><a name="L56">56</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">       </span><span class="n">result</span><span class="w"> </span><span class="o">|=</span><span class="w"> </span><span class="n">ipv6_header</span><span class="p">.</span><span class="n">ip6_src</span><span class="p">.</span><span class="n">s6_addr32</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">^</span><span class="w"> </span><span class="n">lookup</span><span class="p">.</span><span class="n">ip6_src</span><span class="p">.</span><span class="n">s6_addr32</span><span class="p">[</span><span class="n">i</span><span class="p">];</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">slp-vectorizer</td>
+<td><pre style="display:inline">              </pre><span class="column-entry-yellow"> Cannot SLP vectorize list: type <4 x i32> is unsupported by vectorizer&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td><a name="L57">57</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L58">58</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L59">59</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L60">60</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="p">}</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L61">61</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L62">62</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="kt">uint64_t</span><span class="w"> </span><span class="nf">is_dst_one_one_one_one</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">opaque</span><span class="p">,</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">r</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-white">prologepilog</td>
+<td><pre style="display:inline"></pre><span class="column-entry-yellow"> 0 stack bytes in function&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-white">asm-printer</td>
+<td><pre style="display:inline"></pre><span class="column-entry-yellow"> 226 instructions in function&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td><a name="L63">63</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">sum</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L64">64</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">check</span><span class="p">[</span><span class="n">BATCH_SIZE</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="nb">false</span><span class="p">};</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L65">65</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">ip6_hdr</span><span class="w"> </span><span class="o">*</span><span class="n">ipv6_headers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">ip6_hdr</span><span class="w"> </span><span class="o">*</span><span class="p">)(</span><span class="n">opaque</span><span class="p">);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L66">66</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">ip6_hdr</span><span class="w"> </span><span class="o">*</span><span class="n">lookups</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="k">struct</span><span class="w"> </span><span class="nc">ip6_hdr</span><span class="w"> </span><span class="o">*</span><span class="p">)(</span><span class="n">r</span><span class="p">);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L67">67</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">BATCH_SIZE</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">loop-unroll</td>
+<td><pre style="display:inline">    </pre><span class="column-entry-yellow"> completely unrolled loop with 4 iterations&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td><a name="L68">68</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="o">&lt;</span><span class="n">RULES_NUM</span><span class="p">;</span><span class="o">++</span><span class="n">j</span><span class="p">)</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-white">loop-vectorize</td>
+<td><pre style="display:inline">        </pre><span class="column-entry-yellow"> the cost-model indicates that interleaving is not beneficial&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">loop-vectorize</td>
+<td><pre style="display:inline">        </pre><span class="column-entry-yellow"> vectorized loop (vectorization width: 4, interleaved count: 1)&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">slp-vectorizer</td>
+<td><pre style="display:inline">                                    </pre><span class="column-entry-yellow"> Cannot SLP vectorize list: vectorization was impossible with available vectorization factors&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">slp-vectorizer</td>
+<td><pre style="display:inline">                                    </pre><span class="column-entry-yellow"> Cannot SLP vectorize list: type <4 x i32> is unsupported by vectorizer&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td><a name="L69">69</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">            </span><span class="n">sum</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">check_ipv6_rule</span><span class="p">(</span><span class="n">lookups</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="n">ipv6_headers</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">inline</td>
+<td><pre style="display:inline">                   </pre><span class="column-entry-yellow"> 'check_ipv6_rule' inlined into 'is_dst_one_one_one_one' with (cost=-15085, threshold=337) at callsite is_dst_one_one_one_one:7:20;&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">licm</td>
+<td><pre style="display:inline">                                              </pre><span class="column-entry-yellow"> hoisting <a href="test.c.html#L69">zext</a>&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">licm</td>
+<td><pre style="display:inline">                   </pre><span class="column-entry-yellow"> hoisting <a href="test.c.html#L69">getelementptr</a>&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">licm</td>
+<td><pre style="display:inline">                   </pre><span class="column-entry-yellow"> hoisting <a href="test.c.html#L69">load</a>&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L60">is_dst_one_one_one_one</a></td>
+</tr>
+
+<tr>
+<td><a name="L70">70</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sum</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L71">71</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="p">}</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L72">72</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L73">73</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L74">74</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="p">{</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-white">prologepilog</td>
+<td><pre style="display:inline"></pre><span class="column-entry-yellow"> 40 stack bytes in function&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L72">main</a></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-white">asm-printer</td>
+<td><pre style="display:inline"></pre><span class="column-entry-yellow"> 59 instructions in function&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L72">main</a></td>
+</tr>
+
+<tr>
+<td><a name="L75">75</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">mem_len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L76">76</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L77">77</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">mem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">readfile</span><span class="p">(</span><span class="s">&quot;ipv6_in.mem&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">mem_len</span><span class="p">);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">inline</td>
+<td><pre style="display:inline">                </pre><span class="column-entry-yellow"> '<a href="test.c.html#L30">readfile</a>' inlined into 'main' with (cost=145, threshold=225) at callsite main:4:17;&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L72">main</a></td>
+</tr>
+
+<tr>
+<td><a name="L78">78</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">void</span><span class="o">*</span><span class="w"> </span><span class="n">r_mem</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">readfile</span><span class="p">(</span><span class="s">&quot;rule_in.mem&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">1024</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">mem_len</span><span class="p">);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-green">inline</td>
+<td><pre style="display:inline">                  </pre><span class="column-entry-yellow"> 'readfile' inlined into 'main' with (cost=-14855, threshold=225) at callsite main:5:19;&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L72">main</a></td>
+</tr>
+
+<tr>
+<td><a name="L79">79</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L80">80</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L81">81</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="kt">long</span><span class="w"> </span><span class="n">ret</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">is_dst_one_one_one_one</span><span class="p">(</span><span class="n">mem</span><span class="p">,</span><span class="w"> </span><span class="n">r_mem</span><span class="p">);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">inline</td>
+<td><pre style="display:inline">               </pre><span class="column-entry-yellow"> '<a href="test.c.html#L62">is_dst_one_one_one_one</a>' not inlined into 'main' because too costly to inline (cost=465, threshold=225)&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L72">main</a></td>
+</tr>
+
+<tr>
+<td><a name="L82">82</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;%ld </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span><span class="n">ret</span><span class="p">);</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td class="column-entry-red">inline</td>
+<td><pre style="display:inline">    </pre><span class="column-entry-yellow"> printf will not be inlined into main because its definition is unavailable&nbsp;</span></td>
+<td class="column-entry-yellow"><a href="test.c.html#L72">main</a></td>
+</tr>
+
+<tr>
+<td><a name="L83">83</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L84">84</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre><span class="p">}</span><span class="w"></span></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L85">85</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+<tr>
+<td><a name="L86">86</a></td>
+<td></td>
+<td></td>
+<td><div class="highlight"><pre></pre></div></td>
+</tr>
+
+</tbody>
+</table>
+</body>
+</html>
