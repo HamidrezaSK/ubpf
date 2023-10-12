@@ -244,10 +244,519 @@ ubpf_set_register_offset(int x)
 //         }
 //     }
 // }
+static int
+translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg)
+{
+    int i;
 
+    /* Save platform non-volatile registers */
+    for (i = 0; i < _countof(platform_nonvolatile_registers); i++) {
+        emit_push(state, platform_nonvolatile_registers[i]);
+    }
+
+    /* Move first platform parameter register into register 1 */
+    if (map_register(1) != platform_parameter_registers[0]) {
+        emit_mov(state, platform_parameter_registers[0], map_register(BPF_REG_1));
+    }
+
+    /*
+     * Assuming that the stack is 16-byte aligned right before
+     * the call insn that brought us to this code, when
+     * we start executing the jit'd code, we need to regain a 16-byte
+     * alignment. The UBPF_STACK_SIZE is guaranteed to be
+     * divisible by 16. However, if we pushed an even number of
+     * registers on the stack when we are saving state (see above),
+     * then we have to add an additional 8 bytes to get back
+     * to a 16-byte alignment.
+     */
+    if (!(_countof(platform_nonvolatile_registers) % 2)) {
+        emit_alu64_imm32(state, 0x81, 5, RSP, 0x8);
+    }
+
+    /*
+     * Set BPF R10 (the way to access the frame in eBPF) to match RSP.
+     */
+    emit_mov(state, RSP, map_register(BPF_REG_10));
+
+    /* Allocate stack space */
+    emit_alu64_imm32(state, 0x81, 5, RSP, UBPF_STACK_SIZE);
+
+#if defined(_WIN32)
+    /* Windows x64 ABI requires home register space */
+    /* Allocate home register space - 4 registers */
+    emit_alu64_imm32(state, 0x81, 5, RSP, 4 * sizeof(uint64_t));
+#endif
+
+    /*
+     * Use a call to set up a place where we can land after eBPF program's
+     * final EXIT call. This makes it appear to the ebpf programs
+     * as if they are called like a function. It is their responsibility
+     * to deal with the non-16-byte aligned stack pointer that goes along
+     * with this pretense.
+     */
+    emit1(state, 0xe8);
+    emit4(state, 5);
+    /*
+     * We jump over this instruction in the first place; return here
+     * after the eBPF program is finished executing.
+     */
+    emit_jmp(state, TARGET_PC_EXIT);
+
+    for (i = 0; i < vm->num_insts; i++) {
+        struct ebpf_inst inst = ubpf_fetch_instruction(vm, i);
+        state->pc_locs[i] = state->offset;
+
+        int dst = map_register(inst.dst);
+        int src = map_register(inst.src);
+        uint32_t target_pc = i + inst.offset + 1;
+
+        if (i == 0 || vm->int_funcs[i]) {
+            /* When we are the subject of a call, we have to properly align our
+             * stack pointer.
+             */
+            emit_alu64_imm32(state, 0x81, 5, RSP, 8);
+        }
+
+        switch (inst.opcode) {
+        case EBPF_OP_ADD_IMM:
+            emit_alu32_imm32(state, 0x81, 0, dst, inst.imm);
+            break;
+        case EBPF_OP_ADD_REG:
+            emit_alu32(state, 0x01, src, dst);
+            break;
+        case EBPF_OP_SUB_IMM:
+            emit_alu32_imm32(state, 0x81, 5, dst, inst.imm);
+            break;
+        case EBPF_OP_SUB_REG:
+            emit_alu32(state, 0x29, src, dst);
+            break;
+        case EBPF_OP_MUL_IMM:
+        case EBPF_OP_MUL_REG:
+        case EBPF_OP_DIV_IMM:
+        case EBPF_OP_DIV_REG:
+        case EBPF_OP_MOD_IMM:
+        case EBPF_OP_MOD_REG:
+            muldivmod(state, inst.opcode, src, dst, inst.imm);
+            break;
+        case EBPF_OP_OR_IMM:
+            emit_alu32_imm32(state, 0x81, 1, dst, inst.imm);
+            break;
+        case EBPF_OP_OR_REG:
+            emit_alu32(state, 0x09, src, dst);
+            break;
+        case EBPF_OP_AND_IMM:
+            emit_alu32_imm32(state, 0x81, 4, dst, inst.imm);
+            break;
+        case EBPF_OP_AND_REG:
+            emit_alu32(state, 0x21, src, dst);
+            break;
+        case EBPF_OP_LSH_IMM:
+            emit_alu32_imm8(state, 0xc1, 4, dst, inst.imm);
+            break;
+        case EBPF_OP_LSH_REG:
+            emit_mov(state, src, RCX);
+            emit_alu32(state, 0xd3, 4, dst);
+            break;
+        case EBPF_OP_RSH_IMM:
+            emit_alu32_imm8(state, 0xc1, 5, dst, inst.imm);
+            break;
+        case EBPF_OP_RSH_REG:
+            emit_mov(state, src, RCX);
+            emit_alu32(state, 0xd3, 5, dst);
+            break;
+        case EBPF_OP_NEG:
+            emit_alu32(state, 0xf7, 3, dst);
+            break;
+        case EBPF_OP_XOR_IMM:
+            emit_alu32_imm32(state, 0x81, 6, dst, inst.imm);
+            break;
+        case EBPF_OP_XOR_REG:
+            emit_alu32(state, 0x31, src, dst);
+            break;
+        case EBPF_OP_MOV_IMM:
+            emit_alu32_imm32(state, 0xc7, 0, dst, inst.imm);
+            break;
+        case EBPF_OP_MOV_REG:
+            emit_mov(state, src, dst);
+            break;
+        case EBPF_OP_ARSH_IMM:
+            emit_alu32_imm8(state, 0xc1, 7, dst, inst.imm);
+            break;
+        case EBPF_OP_ARSH_REG:
+            emit_mov(state, src, RCX);
+            emit_alu32(state, 0xd3, 7, dst);
+            break;
+
+        case EBPF_OP_LE:
+            /* No-op */
+            break;
+        case EBPF_OP_BE:
+            if (inst.imm == 16) {
+                /* rol */
+                emit1(state, 0x66); /* 16-bit override */
+                emit_alu32_imm8(state, 0xc1, 0, dst, 8);
+                /* and */
+                emit_alu32_imm32(state, 0x81, 4, dst, 0xffff);
+            } else if (inst.imm == 32 || inst.imm == 64) {
+                /* bswap */
+                emit_basic_rex(state, inst.imm == 64, 0, dst);
+                emit1(state, 0x0f);
+                emit1(state, 0xc8 | (dst & 7));
+            }
+            break;
+
+        case EBPF_OP_ADD64_IMM:
+            emit_alu64_imm32(state, 0x81, 0, dst, inst.imm);
+            break;
+        case EBPF_OP_ADD64_REG:
+            emit_alu64(state, 0x01, src, dst);
+            break;
+        case EBPF_OP_SUB64_IMM:
+            emit_alu64_imm32(state, 0x81, 5, dst, inst.imm);
+            break;
+        case EBPF_OP_SUB64_REG:
+            emit_alu64(state, 0x29, src, dst);
+            break;
+        case EBPF_OP_MUL64_IMM:
+        case EBPF_OP_MUL64_REG:
+        case EBPF_OP_DIV64_IMM:
+        case EBPF_OP_DIV64_REG:
+        case EBPF_OP_MOD64_IMM:
+        case EBPF_OP_MOD64_REG:
+            muldivmod(state, inst.opcode, src, dst, inst.imm);
+            break;
+        case EBPF_OP_OR64_IMM:
+            emit_alu64_imm32(state, 0x81, 1, dst, inst.imm);
+            break;
+        case EBPF_OP_OR64_REG:
+            emit_alu64(state, 0x09, src, dst);
+            break;
+        case EBPF_OP_AND64_IMM:
+            emit_alu64_imm32(state, 0x81, 4, dst, inst.imm);
+            break;
+        case EBPF_OP_AND64_REG:
+            emit_alu64(state, 0x21, src, dst);
+            break;
+        case EBPF_OP_LSH64_IMM:
+            emit_alu64_imm8(state, 0xc1, 4, dst, inst.imm);
+            break;
+        case EBPF_OP_LSH64_REG:
+            emit_mov(state, src, RCX);
+            emit_alu64(state, 0xd3, 4, dst);
+            break;
+        case EBPF_OP_RSH64_IMM:
+            emit_alu64_imm8(state, 0xc1, 5, dst, inst.imm);
+            break;
+        case EBPF_OP_RSH64_REG:
+            emit_mov(state, src, RCX);
+            emit_alu64(state, 0xd3, 5, dst);
+            break;
+        case EBPF_OP_NEG64:
+            emit_alu64(state, 0xf7, 3, dst);
+            break;
+        case EBPF_OP_XOR64_IMM:
+            emit_alu64_imm32(state, 0x81, 6, dst, inst.imm);
+            break;
+        case EBPF_OP_XOR64_REG:
+            emit_alu64(state, 0x31, src, dst);
+            break;
+        case EBPF_OP_MOV64_IMM:
+            emit_load_imm(state, dst, inst.imm);
+            break;
+        case EBPF_OP_MOV64_REG:
+            emit_mov(state, src, dst);
+            break;
+        case EBPF_OP_ARSH64_IMM:
+            emit_alu64_imm8(state, 0xc1, 7, dst, inst.imm);
+            break;
+        case EBPF_OP_ARSH64_REG:
+            emit_mov(state, src, RCX);
+            emit_alu64(state, 0xd3, 7, dst);
+            break;
+
+        /* TODO use 8 bit immediate when possible */
+        case EBPF_OP_JA:
+            emit_jmp(state, target_pc);
+            break;
+        case EBPF_OP_JEQ_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x84, target_pc);
+            break;
+        case EBPF_OP_JEQ_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x84, target_pc);
+            break;
+        case EBPF_OP_JGT_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x87, target_pc);
+            break;
+        case EBPF_OP_JGT_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x87, target_pc);
+            break;
+        case EBPF_OP_JGE_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x83, target_pc);
+            break;
+        case EBPF_OP_JGE_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x83, target_pc);
+            break;
+        case EBPF_OP_JLT_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x82, target_pc);
+            break;
+        case EBPF_OP_JLT_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x82, target_pc);
+            break;
+        case EBPF_OP_JLE_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x86, target_pc);
+            break;
+        case EBPF_OP_JLE_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x86, target_pc);
+            break;
+        case EBPF_OP_JSET_IMM:
+            emit_alu64_imm32(state, 0xf7, 0, dst, inst.imm);
+            emit_jcc(state, 0x85, target_pc);
+            break;
+        case EBPF_OP_JSET_REG:
+            emit_alu64(state, 0x85, src, dst);
+            emit_jcc(state, 0x85, target_pc);
+            break;
+        case EBPF_OP_JNE_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x85, target_pc);
+            break;
+        case EBPF_OP_JNE_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x85, target_pc);
+            break;
+        case EBPF_OP_JSGT_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x8f, target_pc);
+            break;
+        case EBPF_OP_JSGT_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x8f, target_pc);
+            break;
+        case EBPF_OP_JSGE_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x8d, target_pc);
+            break;
+        case EBPF_OP_JSGE_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x8d, target_pc);
+            break;
+        case EBPF_OP_JSLT_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x8c, target_pc);
+            break;
+        case EBPF_OP_JSLT_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x8c, target_pc);
+            break;
+        case EBPF_OP_JSLE_IMM:
+            emit_cmp_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x8e, target_pc);
+            break;
+        case EBPF_OP_JSLE_REG:
+            emit_cmp(state, src, dst);
+            emit_jcc(state, 0x8e, target_pc);
+            break;
+        case EBPF_OP_JEQ32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x84, target_pc);
+            break;
+        case EBPF_OP_JEQ32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x84, target_pc);
+            break;
+        case EBPF_OP_JGT32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x87, target_pc);
+            break;
+        case EBPF_OP_JGT32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x87, target_pc);
+            break;
+        case EBPF_OP_JGE32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x83, target_pc);
+            break;
+        case EBPF_OP_JGE32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x83, target_pc);
+            break;
+        case EBPF_OP_JLT32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x82, target_pc);
+            break;
+        case EBPF_OP_JLT32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x82, target_pc);
+            break;
+        case EBPF_OP_JLE32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x86, target_pc);
+            break;
+        case EBPF_OP_JLE32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x86, target_pc);
+            break;
+        case EBPF_OP_JSET32_IMM:
+            emit_alu32_imm32(state, 0xf7, 0, dst, inst.imm);
+            emit_jcc(state, 0x85, target_pc);
+            break;
+        case EBPF_OP_JSET32_REG:
+            emit_alu32(state, 0x85, src, dst);
+            emit_jcc(state, 0x85, target_pc);
+            break;
+        case EBPF_OP_JNE32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x85, target_pc);
+            break;
+        case EBPF_OP_JNE32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x85, target_pc);
+            break;
+        case EBPF_OP_JSGT32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x8f, target_pc);
+            break;
+        case EBPF_OP_JSGT32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x8f, target_pc);
+            break;
+        case EBPF_OP_JSGE32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x8d, target_pc);
+            break;
+        case EBPF_OP_JSGE32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x8d, target_pc);
+            break;
+        case EBPF_OP_JSLT32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x8c, target_pc);
+            break;
+        case EBPF_OP_JSLT32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x8c, target_pc);
+            break;
+        case EBPF_OP_JSLE32_IMM:
+            emit_cmp32_imm32(state, dst, inst.imm);
+            emit_jcc(state, 0x8e, target_pc);
+            break;
+        case EBPF_OP_JSLE32_REG:
+            emit_cmp32(state, src, dst);
+            emit_jcc(state, 0x8e, target_pc);
+            break;
+        case EBPF_OP_CALL:
+            /* We reserve RCX for shifts */
+            if (inst.src == 0) {
+                emit_mov(state, RCX_ALT, RCX);
+                emit_call(state, vm->ext_funcs[inst.imm]);
+                if (inst.imm == vm->unwind_stack_extension_index) {
+                    emit_cmp_imm32(state, map_register(BPF_REG_0), 0);
+                    emit_jcc(state, 0x84, TARGET_PC_EXIT);
+                }
+            } else if (inst.src == 1) {
+                target_pc = i + inst.imm + 1;
+                emit_local_call(state, target_pc);
+            }
+            break;
+        case EBPF_OP_EXIT:
+            /* On entry to every local function we add an additional 8 bytes.
+             * Undo that here!
+             */
+            emit_alu64_imm32(state, 0x81, 0, RSP, 8);
+            emit_ret(state);
+            break;
+
+        case EBPF_OP_LDXW:
+            emit_load(state, S32, src, dst, inst.offset);
+            break;
+        case EBPF_OP_LDXH:
+            emit_load(state, S16, src, dst, inst.offset);
+            break;
+        case EBPF_OP_LDXB:
+            emit_load(state, S8, src, dst, inst.offset);
+            break;
+        case EBPF_OP_LDXDW:
+            emit_load(state, S64, src, dst, inst.offset);
+            break;
+
+        case EBPF_OP_STW:
+            emit_store_imm32(state, S32, dst, inst.offset, inst.imm);
+            break;
+        case EBPF_OP_STH:
+            emit_store_imm32(state, S16, dst, inst.offset, inst.imm);
+            break;
+        case EBPF_OP_STB:
+            emit_store_imm32(state, S8, dst, inst.offset, inst.imm);
+            break;
+        case EBPF_OP_STDW:
+            emit_store_imm32(state, S64, dst, inst.offset, inst.imm);
+            break;
+
+        case EBPF_OP_STXW:
+            emit_store(state, S32, src, dst, inst.offset);
+            break;
+        case EBPF_OP_STXH:
+            emit_store(state, S16, src, dst, inst.offset);
+            break;
+        case EBPF_OP_STXB:
+            emit_store(state, S8, src, dst, inst.offset);
+            break;
+        case EBPF_OP_STXDW:
+            emit_store(state, S64, src, dst, inst.offset);
+            break;
+
+        case EBPF_OP_LDDW: {
+            struct ebpf_inst inst2 = ubpf_fetch_instruction(vm, ++i);
+            uint64_t imm = (uint32_t)inst.imm | ((uint64_t)inst2.imm << 32);
+            emit_load_imm(state, dst, imm);
+            break;
+        }
+
+        default:
+            *errmsg = ubpf_error("Unknown instruction at PC %d: opcode %02x", i, inst.opcode);
+            return -1;
+        }
+    }
+
+    /* Epilogue */
+    state->exit_loc = state->offset;
+
+    /* Move register 0 into rax */
+    if (map_register(BPF_REG_0) != RAX) {
+        emit_mov(state, map_register(BPF_REG_0), RAX);
+    }
+
+    /* Deallocate stack space by restoring RSP from BPF R10. */
+    emit_mov(state, map_register(BPF_REG_10), RSP);
+
+    if (!(_countof(platform_nonvolatile_registers) % 2)) {
+        emit_alu64_imm32(state, 0x81, 0, RSP, 0x8);
+    }
+
+    /* Restore platform non-volatile registers */
+    for (i = 0; i < _countof(platform_nonvolatile_registers); i++) {
+        emit_pop(state, platform_nonvolatile_registers[_countof(platform_nonvolatile_registers) - i - 1]);
+    }
+
+    emit1(state, 0xc3); /* ret */
+
+    state->retpoline_loc = emit_retpoline(state);
+
+    return 0;
+}
 
 static int
-translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct load* loads, struct packed_group* groups, int num_groups)
+my_translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct load* loads, struct packed_group* groups, int num_groups)
 {
     int i;
     int load_count = 0;
@@ -1293,16 +1802,12 @@ analyse(struct ubpf_vm* vm, struct load* loads, int *num_loads)
     }
     qsort (loads, count, sizeof(*loads), comp_load);
     *num_loads = count;
-    for (i = 0; i < count; i++)
-    {
-        // printf("packed_load offset: %d, packed_load position: %d\n",loads[i].addr_offset, loads[i].inst_offset);
-    }
     
     return 0;
 }
 
 int
-ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg)
+ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg, bool vanila)
 {
     struct jit_state state;
     int result = -1;
@@ -1320,18 +1825,28 @@ ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** 
     struct jump_ana* my_jne = calloc(UBPF_MAX_INSTS, sizeof(my_jne[0]));
     struct packed_group* groups = calloc(UBPF_MAX_INSTS, sizeof(groups[0]));
     struct load* packed_loads = calloc(UBPF_MAX_INSTS, sizeof(packed_loads[0]));
+    
+    if(vanila)
+    {
+        if (translate(vm, &state, errmsg) < 0) {
+            goto out;
+        }
+    }
+    else
+    {
+        if (analyse(vm, packed_loads, &num_vec_loads) < 0) {
+            goto out;
+        }
 
-    if (analyse(vm, packed_loads, &num_vec_loads) < 0) {
-        goto out;
+        if (analyse_jmp(vm, my_jne, groups, &num_groups) < 0) {
+            goto out;
+        }
+
+        if (my_translate(vm, &state, errmsg, packed_loads, groups, num_groups) < 0) {
+            goto out;
+        }
     }
 
-    if (analyse_jmp(vm, my_jne, groups, &num_groups) < 0) {
-        goto out;
-    }
-
-    if (translate(vm, &state, errmsg, packed_loads, groups, num_groups) < 0) {
-        goto out;
-    }
 
     if (state.num_jumps == UBPF_MAX_INSTS) {
         *errmsg = ubpf_error("Excessive number of jump targets");

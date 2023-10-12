@@ -189,6 +189,7 @@ main(int argc, char** argv)
         },
         {.name = "mem", .val = 'm', .has_arg = 1},
         {.name = "jit", .val = 'j'},
+        {.name = "vanila", .val = 'v'},
         {.name = "data", .val = 'd'},
         {.name = "register-offset", .val = 'r', .has_arg = 1},
         {.name = "unload", .val = 'U'}, /* for unit test only */
@@ -202,11 +203,13 @@ main(int argc, char** argv)
     bool unload = false;
     bool reload = false;
     bool data_relocation = false; // treat R_BPF_64_64 as relocations to maps by default.
+    bool my_jit = false; // use my jit
+
 
     uint64_t secret = (uint64_t)rand() << 32 | (uint64_t)rand();
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "hm:jdr:URs:", longopts, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "hm:vjdr:URs:", longopts, NULL)) != -1) {
         switch (opt) {
         case 'm':
             mem_filename = optarg;
@@ -231,6 +234,9 @@ main(int argc, char** argv)
             break;
         case 'R':
             reload = true;
+            break;
+        case 'v':
+            my_jit = true;
             break;
         default:
             usage(argv[0]);
@@ -329,7 +335,12 @@ load:
     int i;
 
     if (jit) {
-        ubpf_jit_fn fn = ubpf_compile(vm, &errmsg);
+        ubpf_jit_fn fn;
+        if(!my_jit)
+            fn = ubpf_compile(vm, &errmsg, 1);
+        else
+            fn = ubpf_compile(vm, &errmsg, 0);
+
         if (fn == NULL) {
             fprintf(stderr, "Failed to compile: %s\n", errmsg);
             free(errmsg);

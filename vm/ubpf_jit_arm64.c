@@ -1176,7 +1176,7 @@ resolve_jumps(struct jit_state* state)
 }
 
 int
-ubpf_translate_arm64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg)
+ubpf_translate_arm64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg, bool vanila)
 {
     struct jit_state state;
     int result = -1;
@@ -1187,6 +1187,9 @@ ubpf_translate_arm64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** e
     state.pc_locs = calloc(UBPF_MAX_INSTS + 1, sizeof(state.pc_locs[0]));
     state.jumps = calloc(UBPF_MAX_INSTS, sizeof(state.jumps[0]));
     state.num_jumps = 0;
+
+    if(!vanila)
+        printf("Modified jit is not supported for ARM!\n");
 
     if (translate(vm, &state, errmsg) < 0) {
         goto out;

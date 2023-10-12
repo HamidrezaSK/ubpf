@@ -34,24 +34,25 @@
 #define UNUSED(x) ((void)x)
 
 int
-ubpf_translate(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg)
+ubpf_translate(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg, bool vanila)
 {
-    return vm->translate(vm, buffer, size, errmsg);
+    return vm->translate(vm, buffer, size, errmsg, vanila);
 }
 
 int
-ubpf_translate_null(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg)
+ubpf_translate_null(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg, bool vanila)
 {
     /* NULL JIT target - just returns an error. */
     UNUSED(vm);
     UNUSED(buffer);
     UNUSED(size);
+    UNUSED(&vanila);
     *errmsg = ubpf_error("Code can not be JITed on this target.");
     return -1;
 }
 
 ubpf_jit_fn
-ubpf_compile(struct ubpf_vm* vm, char** errmsg)
+ubpf_compile(struct ubpf_vm* vm, char** errmsg, bool vanila)
 {
     void* jitted = NULL;
     uint8_t* buffer = NULL;
@@ -75,7 +76,7 @@ ubpf_compile(struct ubpf_vm* vm, char** errmsg)
         goto out;
     }
 
-    if (ubpf_translate(vm, buffer, &jitted_size, errmsg) < 0) {
+    if (ubpf_translate(vm, buffer, &jitted_size, errmsg, vanila) < 0) {
         goto out;
     }
 

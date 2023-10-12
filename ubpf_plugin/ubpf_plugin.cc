@@ -151,7 +151,7 @@ int main(int argc, char **argv)
     uint64_t actual_result;
     if (jit)
     {
-        ubpf_jit_fn fn = ubpf_compile(vm.get(), &error);
+        ubpf_jit_fn fn = ubpf_compile(vm.get(), &error, 1);
         if (fn == nullptr)
         {
             std::cerr << "Failed to compile program: " << error << std::endl;
