@@ -1,0 +1,1699 @@
+--- !Passed
+Pass:            inline
+Name:            AlwaysInline
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 108, 
+                   Column: 8 }
+Function:        parse_ethhdr_vlan
+Args:
+  - String:          ''''
+  - Callee:          proto_is_vlan
+  - String:          ''' inlined into '''
+  - Caller:          parse_ethhdr_vlan
+    DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 83, 
+                       Column: 0 }
+  - String:          ''''
+  - String:          ': always inline attribute'
+  - String:          ' at callsite '
+  - String:          parse_ethhdr_vlan
+  - String:          ':'
+  - Line:            '29'
+  - String:          ':'
+  - Column:          '8'
+  - String:          ';'
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+Function:        parse_ethhdr_vlan
+Args:
+  - String:          'hoisting '
+  - Inst:            bitcast
+...
+--- !Passed
+Pass:            loop-unroll
+Name:            FullyUnrolled
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 107, 
+                   Column: 2 }
+Function:        parse_ethhdr_vlan
+Args:
+  - String:          'completely unrolled loop with '
+  - UnrollCount:     '2'
+  - String:          ' iterations'
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 100, 
+                   Column: 12 }
+Function:        parse_ethhdr_vlan
+Args:
+  - String:          'load of type '
+  - Type:            '%struct.vlan_hdr*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 99, 
+                       Column: 10 }
+...
+--- !Passed
+Pass:            inline
+Name:            AlwaysInline
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 130, 
+                   Column: 9 }
+Function:        parse_ethhdr
+Args:
+  - String:          ''''
+  - Callee:          parse_ethhdr_vlan
+  - String:          ''' inlined into '''
+  - Caller:          parse_ethhdr
+    DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 128, 
+                       Column: 0 }
+  - String:          ''''
+  - String:          ': always inline attribute'
+  - String:          ' at callsite '
+  - String:          parse_ethhdr
+  - String:          ':'
+  - Line:            '5'
+  - String:          ':'
+  - Column:          '9'
+  - String:          ';'
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 100, 
+                   Column: 12 }
+Function:        parse_ethhdr
+Args:
+  - String:          'load of type '
+  - Type:            '%struct.vlan_hdr*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     store
+    DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 99, 
+                       Column: 10 }
+...
+--- !Passed
+Pass:            inline
+Name:            AlwaysInline
+DebugLoc:        { File: xdp_prog.c, Line: 122, Column: 13 }
+Function:        xdp_firewall_func
+Args:
+  - String:          ''''
+  - Callee:          parse_ethhdr
+  - String:          ''' inlined into '''
+  - Caller:          xdp_firewall_func
+    DebugLoc:        { File: xdp_prog.c, Line: 100, Column: 0 }
+  - String:          ''''
+  - String:          ': always inline attribute'
+  - String:          ' at callsite '
+  - String:          xdp_firewall_func
+  - String:          ':'
+  - Line:            '23'
+  - String:          ':'
+  - Column:          '13'
+  - String:          ';'
+...
+--- !Passed
+Pass:            inline
+Name:            AlwaysInline
+DebugLoc:        { File: xdp_prog.c, Line: 131, Column: 3 }
+Function:        xdp_firewall_func
+Args:
+  - String:          ''''
+  - Callee:          parse_iphdr
+  - String:          ''' inlined into '''
+  - Caller:          xdp_firewall_func
+    DebugLoc:        { File: xdp_prog.c, Line: 100, Column: 0 }
+  - String:          ''''
+  - String:          ': always inline attribute'
+  - String:          ' at callsite '
+  - String:          xdp_firewall_func
+  - String:          ':'
+  - Line:            '32'
+  - String:          ':'
+  - Column:          '3'
+  - String:          ';'
+...
+--- !Passed
+Pass:            inline
+Name:            AlwaysInline
+DebugLoc:        { File: xdp_prog.c, Line: 133, Column: 3 }
+Function:        xdp_firewall_func
+Args:
+  - String:          ''''
+  - Callee:          parse_ip6hdr
+  - String:          ''' inlined into '''
+  - Caller:          xdp_firewall_func
+    DebugLoc:        { File: xdp_prog.c, Line: 100, Column: 0 }
+  - String:          ''''
+  - String:          ': always inline attribute'
+  - String:          ' at callsite '
+  - String:          xdp_firewall_func
+  - String:          ':'
+  - Line:            '34'
+  - String:          ':'
+  - Column:          '3'
+  - String:          ';'
+...
+--- !Passed
+Pass:            loop-unroll
+Name:            FullyUnrolled
+DebugLoc:        { File: xdp_prog.c, Line: 148, Column: 3 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'completely unrolled loop with '
+  - UnrollCount:     '32'
+  - String:          ' iterations'
+...
+--- !Missed
+Pass:            inline
+Name:            TooCostly
+DebugLoc:        { File: xdp_prog.c, Line: 178, Column: 14 }
+Function:        ubpf_func
+Args:
+  - String:          ''''
+  - Callee:          xdp_firewall_func
+    DebugLoc:        { File: xdp_prog.c, Line: 100, Column: 0 }
+  - String:          ''' not inlined into '''
+  - Caller:          ubpf_func
+    DebugLoc:        { File: xdp_prog.c, Line: 168, Column: 0 }
+  - String:          ''' because too costly to inline '
+  - String:          '(cost='
+  - Cost:            '565'
+  - String:          ', threshold='
+  - Threshold:       '562'
+  - String:          ')'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 80, Column: 12 }
+Function:        readfile
+Args:
+  - Callee:          fopen
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: xdp_prog.c, Line: 77, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 83, Column: 18 }
+Function:        readfile
+Args:
+  - Callee:          calloc
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: xdp_prog.c, Line: 77, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 18 }
+Function:        readfile
+Args:
+  - Callee:          fread
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: xdp_prog.c, Line: 77, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 90, Column: 5 }
+Function:        readfile
+Args:
+  - Callee:          fclose
+    DebugLoc:        { File: '/usr/include/stdio.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: xdp_prog.c, Line: 77, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 80, Column: 12 }
+Function:        readfile
+Args:
+  - Callee:          fopen
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: xdp_prog.c, Line: 77, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 83, Column: 18 }
+Function:        readfile
+Args:
+  - Callee:          calloc
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: xdp_prog.c, Line: 77, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 18 }
+Function:        readfile
+Args:
+  - Callee:          fread
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: xdp_prog.c, Line: 77, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 90, Column: 5 }
+Function:        readfile
+Args:
+  - Callee:          fclose
+    DebugLoc:        { File: '/usr/include/stdio.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          readfile
+    DebugLoc:        { File: xdp_prog.c, Line: 77, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 5 }
+Function:        readfile
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 18 }
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 191, Column: 21 }
+Function:        main
+Args:
+  - Callee:          clock
+    DebugLoc:        { File: '/usr/include/time.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 197, Column: 34 }
+Function:        main
+Args:
+  - Callee:          clock
+    DebugLoc:        { File: '/usr/include/time.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 199, Column: 5 }
+Function:        main
+Args:
+  - Callee:          printf
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 191, Column: 21 }
+Function:        main
+Args:
+  - Callee:          clock
+    DebugLoc:        { File: '/usr/include/time.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 197, Column: 34 }
+Function:        main
+Args:
+  - Callee:          clock
+    DebugLoc:        { File: '/usr/include/time.h', Line: 0, Column: 0 }
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: xdp_prog.c, Line: 199, Column: 5 }
+Function:        main
+Args:
+  - Callee:          printf
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: xdp_prog.c, Line: 187, Column: 17 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          readfile
+  - String:          ''' inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '-14850'
+  - String:          ', threshold='
+  - Threshold:       '225'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          main
+  - String:          ':'
+  - Line:            '5'
+  - String:          ':'
+  - Column:          '17'
+  - String:          ';'
+...
+--- !Passed
+Pass:            inline
+Name:            Inlined
+DebugLoc:        { File: xdp_prog.c, Line: 195, Column: 15 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          ubpf_func
+    DebugLoc:        { File: xdp_prog.c, Line: 168, Column: 0 }
+  - String:          ''' inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+  - String:          ''''
+  - String:          ' with '
+  - String:          '(cost='
+  - Cost:            '0'
+  - String:          ', threshold='
+  - Threshold:       '337'
+  - String:          ')'
+  - String:          ' at callsite '
+  - String:          main
+  - String:          ':'
+  - Line:            '13'
+  - String:          ':'
+  - Column:          '15'
+  - String:          ';'
+...
+--- !Missed
+Pass:            inline
+Name:            TooCostly
+DebugLoc:        { File: xdp_prog.c, Line: 178, Column: 14 }
+Function:        main
+Args:
+  - String:          ''''
+  - Callee:          xdp_firewall_func
+    DebugLoc:        { File: xdp_prog.c, Line: 100, Column: 0 }
+  - String:          ''' not inlined into '''
+  - Caller:          main
+    DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+  - String:          ''' because too costly to inline '
+  - String:          '(cost='
+  - Cost:            '565'
+  - String:          ', threshold='
+  - Threshold:       '562'
+  - String:          ')'
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 5 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 18 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: xdp_prog.c, Line: 193, Column: 5 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: xdp_prog.c, Line: 178, Column: 14 }
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-3'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Passed
+Pass:            slp-vectorizer
+Name:            VectorizedHorizontalReduction
+DebugLoc:        { File: xdp_prog.c, Line: 150, Column: 27 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Vectorized horizontal reduction with cost '
+  - Cost:            '-14'
+  - String:          ' and with tree size '
+  - TreeSize:        '3'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotBeneficial
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 70, 
+                   Column: 20 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'List vectorization was possible but not beneficial with cost '
+  - Cost:            '0'
+  - String:          ' >= '
+  - Treshold:        '0'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 70, 
+                   Column: 46 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 70, 
+                   Column: 46 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotBeneficial
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 70, 
+                   Column: 46 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'List vectorization was possible but not beneficial with cost '
+  - Cost:            '0'
+  - String:          ' >= '
+  - Treshold:        '0'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotBeneficial
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 70, 
+                   Column: 20 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'List vectorization was possible but not beneficial with cost '
+  - Cost:            '0'
+  - String:          ' >= '
+  - Treshold:        '0'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 70, 
+                   Column: 46 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 70, 
+                   Column: 46 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotBeneficial
+DebugLoc:        { File: './../../common/parsing_helpers.h', Line: 70, 
+                   Column: 46 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'List vectorization was possible but not beneficial with cost '
+  - Cost:            '0'
+  - String:          ' >= '
+  - Treshold:        '0'
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            NonReductionValueUsedOutsideLoop
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          value that could not be identified as reduction is used outside the loop
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantComputeNumberOfIterations
+DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 5 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          could not determine number of loop iterations
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 5 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeLibcall
+DebugLoc:        { File: xdp_prog.c, Line: 178, Column: 14 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          call instruction cannot be vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            CantVectorizeInstruction
+DebugLoc:        { File: xdp_prog.c, Line: 193, Column: 5 }
+Function:        main
+Args:
+  - String:          'loop not vectorized: '
+  - String:          instruction cannot be vectorized
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: xdp_prog.c, Line: 193, Column: 5 }
+Function:        main
+Args:
+  - String:          loop not vectorized
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 5 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: xdp_prog.c, Line: 86, Column: 18 }
+...
+--- !Passed
+Pass:            TTI
+Name:            DontUnroll
+DebugLoc:        { File: xdp_prog.c, Line: 193, Column: 5 }
+Function:        main
+Args:
+  - String:          'advising against unrolling the loop because it contains a '
+  - Call:            call
+    DebugLoc:        { File: xdp_prog.c, Line: 178, Column: 14 }
+...
+--- !Missed
+Pass:            regalloc
+Name:            SpillReloadCopies
+DebugLoc:        { File: xdp_prog.c, Line: 99, Column: 1 }
+Function:        xdp_firewall_func
+Args:
+  - NumVRCopies:     '3'
+  - String:          ' virtual registers copies '
+  - TotalCopiesCost: '3.750000e-01'
+  - String:          ' total copies cost '
+  - String:          generated in function
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: xdp_prog.c, Line: 100, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - NumStackBytes:   '0'
+  - String:          ' stack bytes in function'
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '4'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '8'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '2'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '9'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '2'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '2'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '4'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '4'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '8'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '8'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '1'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: xdp_prog.c, Line: 100, Column: 0 }
+Function:        xdp_firewall_func
+Args:
+  - NumInstructions: '232'
+  - String:          ' instructions in function'
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: xdp_prog.c, Line: 168, Column: 0 }
+Function:        ubpf_func
+Args:
+  - NumStackBytes:   '8'
+  - String:          ' stack bytes in function'
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        ubpf_func
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: xdp_prog.c, Line: 168, Column: 0 }
+Function:        ubpf_func
+Args:
+  - NumInstructions: '6'
+  - String:          ' instructions in function'
+...
+--- !Analysis
+Pass:            prologepilog
+Name:            StackSize
+DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+Function:        main
+Args:
+  - NumStackBytes:   '40'
+  - String:          ' stack bytes in function'
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '14'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '10'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '6'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '7'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionMix
+DebugLoc:        { File: xdp_prog.c, Line: 0, Column: 0 }
+Function:        main
+Args:
+  - String:          'BasicBlock: '
+  - BasicBlock:      ''
+  - String:          "\n"
+  - String:          ''
+  - String:          ': '
+  - INST_:           '14'
+  - String:          "\n"
+...
+--- !Analysis
+Pass:            asm-printer
+Name:            InstructionCount
+DebugLoc:        { File: xdp_prog.c, Line: 183, Column: 0 }
+Function:        main
+Args:
+  - NumInstructions: '51'
+  - String:          ' instructions in function'
+...
