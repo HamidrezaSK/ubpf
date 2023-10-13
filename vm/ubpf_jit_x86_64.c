@@ -834,67 +834,66 @@ my_translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct 
             emit_alu64_imm32(state, 0x81, 5, RSP, 8);
         }
 
-        if(i == 0)
-        {
-            emit1(state,0x49);      // move lower mask to r10
-            emit1(state,0xba);
-            emit1(state,0x03);
-            emit1(state,0x02);
-            emit1(state,0x01);
-            emit1(state,0x00);
-            emit1(state,0x07);
-            emit1(state,0x06);
-            emit1(state,0x05);
-            emit1(state,0x04);
+        // if(i == 0)
+        // {
+        //     emit1(state,0x49);      // move lower mask to r10
+        //     emit1(state,0xba);
+        //     emit1(state,0x03);
+        //     emit1(state,0x02);
+        //     emit1(state,0x01);
+        //     emit1(state,0x00);
+        //     emit1(state,0x07);
+        //     emit1(state,0x06);
+        //     emit1(state,0x05);
+        //     emit1(state,0x04);
 
-            emit1(state,0x49);      // move higher mask to r11
-            emit1(state,0xbb);
-            emit1(state,0x0b);
-            emit1(state,0x0a);
-            emit1(state,0x09);
-            emit1(state,0x08);
-            emit1(state,0x0f);
-            emit1(state,0x0e);
-            emit1(state,0x0d);
-            emit1(state,0x0c);
+        //     emit1(state,0x49);      // move higher mask to r11
+        //     emit1(state,0xbb);
+        //     emit1(state,0x0b);
+        //     emit1(state,0x0a);
+        //     emit1(state,0x09);
+        //     emit1(state,0x08);
+        //     emit1(state,0x0f);
+        //     emit1(state,0x0e);
+        //     emit1(state,0x0d);
+        //     emit1(state,0x0c);
 
-            emit1(state,0xc4);      //move lower mask from r10 to xmm2
-            emit1(state,0xc1);
-            emit1(state,0xf9);
-            emit1(state,0x6e);
-            emit1(state,0xd2);
+        //     emit1(state,0xc4);      //move lower mask from r10 to xmm2
+        //     emit1(state,0xc1);
+        //     emit1(state,0xf9);
+        //     emit1(state,0x6e);
+        //     emit1(state,0xd2);
 
-            emit1(state,0xc4);      //move higher mask from r11 to xmm3
-            emit1(state,0xc1);
-            emit1(state,0xf9);
-            emit1(state,0x6e);
-            emit1(state,0xdb);
+        //     emit1(state,0xc4);      //move higher mask from r11 to xmm3
+        //     emit1(state,0xc1);
+        //     emit1(state,0xf9);
+        //     emit1(state,0x6e);
+        //     emit1(state,0xdb);
             
-            emit1(state,0xc5);      //merge xmm2 and xmm3 to xmm2
-            emit1(state,0xe9);
-            emit1(state,0x6c);
-            emit1(state,0xd3);
+        //     emit1(state,0xc5);      //merge xmm2 and xmm3 to xmm2
+        //     emit1(state,0xe9);
+        //     emit1(state,0x6c);
+        //     emit1(state,0xd3);
             
-        }
+        // }
 
         if(i == loads[load_count].inst_offset )
         {
-
             emit1(state, 0xf3);                 // movdqu xmmX, xmmword ptr[src+offset]
             emit_basic_rex(state,0,0,src);
             emit1(state, 0x0f);
             emit1(state, 0x6f);
             emit_modrm_and_displacement(state, load_count!=0, src, inst.offset);
 
-            if(load_count == 0)
-            {
-                //simd byteswap for xmm0 on xmm2 mask
-                emit1(state,0x66);  
-                emit1(state,0x0f);
-                emit1(state,0x38);
-                emit1(state,0x00);
-                emit1(state,0xc2);
-            }
+            // if(load_count == 0)
+            // {
+            //     //simd byteswap for xmm0 on xmm2 mask
+            //     emit1(state,0x66);  
+            //     emit1(state,0x0f);
+            //     emit1(state,0x38);
+            //     emit1(state,0x00);
+            //     emit1(state,0xc2);
+            // }
             load_count++;
         }
         if(processed_index < num_groups && !in_packed_section && groups[processed_index].start == i)
@@ -1672,7 +1671,9 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
         jumps[i].group = group_id;
     }
     *num_groups = group_index + 1;
-
+    // for (i = 0; i< group_index; i++)
+    //     printf("group compare in section %d, started at %d, ended at %d, size is %d\n",
+    //                                     groups[i].section_id, groups[i].start, groups[i].end, groups[i].size);
 
     return 0;
 }
@@ -1685,7 +1686,7 @@ analyse(struct ubpf_vm* vm, struct load* loads, int *num_loads)
     int count = 0;
 
     bool load_started = false;
-    // int16_t started_offset = -1;
+    // int started_offset;
     int load_counter = 0;
     enum operand_size load_size;
 
@@ -1728,80 +1729,86 @@ analyse(struct ubpf_vm* vm, struct load* loads, int *num_loads)
                 }
             }
             break;
-        case EBPF_OP_LDXH:
-            if(!load_started)
-            {
-                // printf("we found a potential 16b packed load start at: %d \n",i);
-                load_started = true;
-                // started_offset = i;
-                load_size = S16;
-                load_counter = 1;
+        // case EBPF_OP_LDXH:
+        //     if(!load_started)
+        //     {
+        //         // printf("we found a potential 16b packed load start at: %d \n",i);
+        //         load_started = true;
+        //         started_offset = i;
+        //         load_size = S16;
+        //         load_counter = 1;
 
-                loads[count].addr_offset = inst.offset;
-                loads[count].inst_offset = i;
-            }
-            else if(load_size == S16)
-            {
-                if(load_counter < 8)
-                {
-                    // printf("This is a 16b packed load at %d which started at %d\n",i,started_offset);
-                    load_counter ++;
-                    if (inst.offset < loads[count].addr_offset)
-                    {
-                        loads[count].addr_offset = inst.offset;
-                        loads[count].inst_offset = i;
-                    }
-                }
-                if(load_counter >= 8)
-                {
-                    // printf("This is the last 16b load from this packed load at %d which started at %d \n",i,started_offset);
-                    load_started = false;
-                    // started_offset = -1;
-                    load_size = -1;
-                    load_counter = 0;
-                    count++;
-                }
-            }
-            break;
-        case EBPF_OP_LDXB:
-            if(!load_started)
-            {
-                // printf("we found a potential 8b packed load start at: %d\n",i);
-                load_started = true;
-                // started_offset = i;
-                load_size = S8;
-                load_counter = 1;
+        //         loads[count].addr_offset = inst.offset;
+        //         loads[count].inst_offset = i;
+        //     }
+        //     else if(load_size == S16)
+        //     {
+        //         if(load_counter < 8)
+        //         {
+        //             printf("This is a 16b packed load at %d which started at %d\n",i,started_offset);
+        //             load_counter ++;
+        //             if (inst.offset < loads[count].addr_offset)
+        //             {
+        //                 loads[count].addr_offset = inst.offset;
+        //                 loads[count].inst_offset = i;
+        //             }
+        //         }
+        //         if(load_counter >= 8)
+        //         {
+        //             // printf("This is the last 16b load from this packed load at %d which started at %d \n",i,started_offset);
+        //             load_started = false;
+        //             started_offset = -1;
+        //             load_size = -1;
+        //             load_counter = 0;
+        //             count++;
+        //         }
+        //     }
+        //     break;
+        // case EBPF_OP_LDXB:
+        //     if(!load_started)
+        //     {
+        //         // printf("we found a potential 8b packed load start at: %d\n",i);
+        //         load_started = true;
+        //         started_offset = i;
+        //         load_size = S8;
+        //         load_counter = 1;
 
-                loads[count].addr_offset = inst.offset;
-                loads[count].inst_offset = i;
-            }
-            else if(load_size == S8)
-            {
-                if(load_counter < 16)
-                {
-                    // printf("This is a 8b packed load at %d which started at %d\n",i,started_offset);
-                    load_counter ++;
-                    if (inst.offset < loads[count].addr_offset)
-                    {
-                        loads[count].addr_offset = inst.offset;
-                        loads[count].inst_offset = i;
-                    }
-                }
-                if(load_counter >= 16)
-                {
-                    // printf("This is the last 16b load from this packed load at %d which started at %d \n",i,started_offset);
-                    load_started = false;
-                    // started_offset = -1;
-                    load_size = -1;
-                    load_counter = 0;
-                    count++;
-                }
-            }
-            break;
+        //         loads[count].addr_offset = inst.offset;
+        //         loads[count].inst_offset = i;
+        //     }
+        //     else if(load_size == S8)
+        //     {
+        //         if(load_counter < 16)
+        //         {
+        //             // printf("This is a 8b packed load at %d which started at %d\n",i,started_offset);
+        //             load_counter ++;
+        //             if (inst.offset < loads[count].addr_offset)
+        //             {
+        //                 loads[count].addr_offset = inst.offset;
+        //                 loads[count].inst_offset = i;
+        //             }
+        //         }
+        //         if(load_counter >= 16)
+        //         {
+        //             // printf("This is the last 16b load from this packed load at %d which started at %d \n",i,started_offset);
+        //             load_started = false;
+        //             started_offset = -1;
+        //             load_size = -1;
+        //             load_counter = 0;
+        //             count++;
+        //         }
+        //     }
+            // break;
         }
     }
     qsort (loads, count, sizeof(*loads), comp_load);
     *num_loads = count;
+
+    // printf("loads are sorted!!\n");
+    // for (i = 0; i< count; i++)
+    // {
+    //     printf("32 bit load at %d offset is %d\n",loads[i].inst_offset,loads[i].addr_offset);
+    // }
     
     return 0;
 }
