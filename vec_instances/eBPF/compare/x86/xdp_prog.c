@@ -164,12 +164,11 @@ out:
 int main()
 {
     size_t mem_len = 0;
-    // srand(time(NULL));
+
     
     void* mem = readfile("ipv6_in.mem", 1024 * 1024, &mem_len);
     int i;
     volatile int ret =0;
-    // printf("fk no: %d", );
     clock_t begin = clock();
 
     for(i = 0; i < TRIAL_NUM ; ++i)
