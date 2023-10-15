@@ -367,7 +367,7 @@ load:
 
     ubpf_destroy(vm);
     free(mem);
-    printf("Average execution time: %.15f",time_spent);
+    printf("Average execution time: %.7f\n",time_spent);
     return 0;
 }
 
