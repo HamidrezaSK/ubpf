@@ -257,12 +257,12 @@ out:
 
 
 
-int main()
+int main(int argc, char *argv[])
 {
     size_t mem_len = 0;
-
+    char *path = argv[1];
     
-    void* mem = readfile("ipv6_in.mem", 1024 * 1024, &mem_len);
+    void* mem = readfile(path, 1024 * 1024, &mem_len);
     int i;
     volatile int ret =0;
     clock_t begin = clock();
