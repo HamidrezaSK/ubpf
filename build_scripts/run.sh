@@ -69,7 +69,7 @@ for command in "${commands[@]}"; do
   done
 done
 
-cd vec_instances/eBPF/compare/x86
+cd ../x86
 
 commands=(
   "taskset 0x200 ./xdp_prog_8 ipv6_in.mem"
