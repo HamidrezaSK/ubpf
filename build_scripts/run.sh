@@ -16,6 +16,8 @@ commands=(
 # Log file
 log_file="log_vanila_jit.log"
 
+rm vec_instances/eBPF/compare/bpf/$log_file
+
 # Loop to run the commands 5 times and log their return values
 for i in {1..5}; do
   for command in "${commands[@]}"; do
@@ -36,6 +38,7 @@ commands=(
 # Log file
 log_file="log_modified_jit.log"
 
+rm vec_instances/eBPF/compare/bpf/$log_file
 # Loop to run the commands 5 times and log their return values
 for i in {1..5}; do
   for command in "${commands[@]}"; do
@@ -55,6 +58,7 @@ commands=(
 # Log file
 log_file="log_aot.log"
 
+rm vec_instances/eBPF/compare/bpf/$log_file
 # Loop to run the commands 5 times and log their return values
 for i in {1..5}; do
   for command in "${commands[@]}"; do
@@ -76,6 +80,7 @@ commands=(
 # Log file
 log_file="log.log"
 
+rm vec_instances/eBPF/compare/bpf/$log_file
 # Loop to run the commands 5 times and log their return values
 for i in {1..5}; do
   for command in "${commands[@]}"; do
