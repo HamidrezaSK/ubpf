@@ -69,7 +69,7 @@ for command in "${commands[@]}"; do
   done
 done
 
-cd ../x86
+cd vec_instances/eBPF/compare/x86
 
 commands=(
   "taskset 0x200 ./xdp_prog_8 ipv6_in.mem"
@@ -80,12 +80,12 @@ commands=(
 # Log file
 log_file="log.log"
 
-rm vec_instances/eBPF/compare/bpf/$log_file
+rm $log_file
 # Loop to run the commands 5 times and log their return values
 for command in "${commands[@]}"; do
   for i in {1..5}; do
     echo "Running: $command"
-    $command >> "vec_instances/eBPF/compare/x86/$log_file" 2>&1
+    $command >> "$log_file" 2>&1
     echo "Exit code: $?" >> "$log_file"
     echo "--------------------" >> "$log_file"
   done
