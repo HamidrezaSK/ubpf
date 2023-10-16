@@ -37,63 +37,63 @@ struct IPv6Rule {
 struct IPv6Rule lookups[RULES_NUM] = {
     {
         // Rule 1
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x03707334},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x03707334},
     },
     {
         // Rule 2
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x13701234},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x13701234},
     },
     {
         // Rule 3
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x25c81946},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x25c81946},
     },
     {
         // Rule 4
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x036025de},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x036025de},
     },
 	    {
         // Rule 5
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x03707335},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x03707335},
     },
     {
         // Rule 6
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x13701236},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x13701236},
     },
     {
         // Rule 7
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x15c81923},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x15c81923},
     },
     {
         // Rule 8
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x03707334},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x03707334},
     },
     {
         // Rule 9
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x13701234},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x13701234},
     },
     {
         // Rule 10
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x25c81946},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x25c81946},
     },
     {
         // Rule 11
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x036025de},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x036025de},
     },
 	    {
         // Rule 12
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x03707335},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x03707335},
     },
     {
         // Rule 13
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x13701236},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x13701236},
     },
     {
         // Rule 14
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x15c81923},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x15c81923},
     },
 	{
         // Rule 15
-        .src_ip.s6_addr32 = {0x2a032880, 0xf21a0083, 0xfaceb00b, 0x15c81923},
+        .src_ip.s6_addr32 = {2917007612, 16842442, 0, 0x15c81923},
     },
     {
         // Rule 16
