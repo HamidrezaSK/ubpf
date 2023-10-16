@@ -8,9 +8,10 @@ cd ../
 
 # Define the commands to run
 commands=(
-  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_32.o -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
-  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_16.o -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
   "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_8.o -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_16.o -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_32.o -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_64.o -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
 )
 
 # Log file
@@ -30,9 +31,10 @@ done
 
 
 commands=(
-  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_32.o -v -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
-  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_16.o -v -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
   "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_8.o -v -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_16.o -v -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_32.o -v -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_64.o -v -d -j -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
 )
 
 # Log file
@@ -50,9 +52,10 @@ for command in "${commands[@]}"; do
 done
 
 commands=(
-  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_32.o -d -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
-  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_16.o -d -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
   "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_8.o -d -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_16.o -d -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_32.o -d -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/compare/bpf/xdp_prog_64.o -d -m vec_instances/eBPF/compare/bpf/ipv6_in.mem"
 )
 
 # Log file
@@ -75,6 +78,7 @@ commands=(
   "taskset 0x200 ./xdp_prog_8 ipv6_in.mem"
   "taskset 0x200 ./xdp_prog_16 ipv6_in.mem"
   "taskset 0x200 ./xdp_prog_32 ipv6_in.mem"
+  "taskset 0x200 ./xdp_prog_64 ipv6_in.mem"
 )
 
 # Log file

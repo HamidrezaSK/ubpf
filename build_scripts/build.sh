@@ -32,6 +32,7 @@ cd -
 clang -O2 -target bpf -c vec_instances/eBPF/compare/bpf/xdp_prog_32.c -o vec_instances/eBPF/compare/bpf/xdp_prog_32.o
 clang -O2 -target bpf -c vec_instances/eBPF/compare/bpf/xdp_prog_16.c -o vec_instances/eBPF/compare/bpf/xdp_prog_16.o
 clang -O2 -target bpf -c vec_instances/eBPF/compare/bpf/xdp_prog_8.c -o vec_instances/eBPF/compare/bpf/xdp_prog_8.o
+clang -O2 -target bpf -c vec_instances/eBPF/compare/bpf/xdp_prog_64.c -o vec_instances/eBPF/compare/bpf/xdp_prog_64.o
 
 # Change directory to vec_instances/eBPF/compare/x86
 cd vec_instances/eBPF/compare/x86
@@ -43,3 +44,4 @@ python packet_gen_random.py
 clang -g -O2 xdp_prog_16.c -o xdp_prog_16
 clang -g -O2 xdp_prog_32.c -o xdp_prog_32
 clang -g -O2 xdp_prog_8.c -o xdp_prog_8
+clang -g -O2 xdp_prog_64.c -o xdp_prog_64
