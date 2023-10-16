@@ -2,26 +2,45 @@ import re
 import matplotlib.pyplot as plt
 from statistics import mean 
 
-def plot(vanila_jit, modified_jit, aot, x86):
+def plot(vanila_jit, modified_jit, aot, x86, cache):
     keys = list(vanila_jit.keys())
-    fig, ax = plt.subplots()
+    fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 
     # Scatter plot for each mode
     for mode, data in [("aot times", aot), ("vanilla_jit times", vanila_jit), ("x86 times", x86), ("modified_jit times", modified_jit)]:
-        # y_values = [mean(data[8]), mean(data[16]), mean(data[32])]  # Get execution times for each mode
-        y_values =  [mean(data[key]) for key in keys]
         x_values = keys
-        ax.plot(x_values, y_values, label=mode, marker='o')
+        y_values =  [mean(data[key]) for key in keys]
+        axs[0].plot(x_values, y_values, label=mode, marker='o')
+        y_values =  [min(data[key]) for key in keys]
+        axs[1].plot(x_values, y_values, label=mode, marker='o')
+        y_values =  [max(data[key]) for key in keys]
+        axs[2].plot(x_values, y_values, label=mode, marker='o')
+
 
     # Customize the plot
-    ax.set_xlabel('Key')
-    ax.set_ylabel('Execution Time')
-    ax.set_title('Execution Times for Different Modes')
-    ax.set_xticks(keys)
-    ax.legend()
+    axs[0].set_xlabel('Key')
+    axs[0].set_ylabel('Execution Time')
+    axs[0].set_title('Mean Execution Times for Different Modes ' + cache)
+    axs[0].set_xticks(keys)
+    axs[0].legend()
+    axs[0].grid(True)
+
+    axs[1].set_xlabel('Key')
+    axs[1].set_ylabel('Execution Time')
+    axs[1].set_title('Min Execution Times for Different Modes ' + cache)
+    axs[1].set_xticks(keys)
+    axs[1].legend()
+    axs[1].grid(True)
+
+    axs[2].set_xlabel('Key')
+    axs[2].set_ylabel('Execution Time')
+    axs[2].set_title('Max Execution Times for Different Modes ' + cache)
+    axs[2].set_xticks(keys)
+    axs[2].legend()
+    axs[2].grid(True)
 
     # Show the plot
-    plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
 
@@ -38,7 +57,7 @@ def extract_times(path):
 
 def list_to_dict (data, keys):
     temp = {}
-    num_exp = 5
+    num_exp = 20
 
     for i in range(len(keys)):
         temp[keys[i]] = data[i*num_exp:(i+1)*num_exp]
@@ -49,33 +68,52 @@ def list_to_dict (data, keys):
 
 if __name__ == "__main__":
 
-    vanila_jit = extract_times("bpf/log_vanila_jit.log")
+    vanila_jit_hot = extract_times("bpf/log_vanila_jit_hot.log")
 
-    modified_jit = extract_times("bpf/log_modified_jit.log")  
+    modified_jit_hot = extract_times("bpf/log_modified_jit_hot.log")  
 
-    aot = extract_times("bpf/log_aot.log")
+    aot_hot = extract_times("bpf/log_aot_hot.log")
 
-    x86 = extract_times("x86/log.log")
+    x86_hot = extract_times("x86/log_hot.log")
 
     keys = [8, 16, 32, 64]
 
 
 
-    vanila_jit = list_to_dict(vanila_jit,keys)
+    vanila_jit_hot = list_to_dict(vanila_jit_hot,keys)
 
-    modified_jit = list_to_dict(modified_jit,keys)
+    modified_jit_hot = list_to_dict(modified_jit_hot,keys)
 
-    aot = list_to_dict(aot,keys)
+    aot_hot = list_to_dict(aot_hot,keys)
 
-    x86 = list_to_dict(x86,keys)
+    x86_hot = list_to_dict(x86_hot,keys)
+
+
+    vanila_jit_cold = extract_times("bpf/log_vanila_jit_cold.log")
+
+    modified_jit_cold = extract_times("bpf/log_modified_jit_cold.log")  
+
+    aot_cold = extract_times("bpf/log_aot_cold.log")
+
+    x86_cold = extract_times("x86/log_cold.log")
+
+    keys = [8, 16, 32, 64]
+
+
+
+    vanila_jit_cold = list_to_dict(vanila_jit_cold,keys)
+
+    modified_jit_cold = list_to_dict(modified_jit_cold,keys)
+
+    aot_cold = list_to_dict(aot_cold,keys)
+
+    x86_cold = list_to_dict(x86_cold,keys)
     
-    # modified_jit = {8: modified_jit[:5], 16: modified_jit[5:10], 32: modified_jit[10:15]}
+    #plot
 
-    # aot = {8: aot[:5], 16: aot[5:10], 32: aot[10:15]}
-    
-    # x86 = {8: x86[:5], 16: x86[5:10], 32: x86[10:]}
+    plot(vanila_jit_hot, modified_jit_hot, aot_hot, x86_hot, "Hot")
 
-    plot(vanila_jit, modified_jit, aot, x86)
+    plot(vanila_jit_cold, modified_jit_cold, aot_cold, x86_cold, "Cold")
 
 
 
