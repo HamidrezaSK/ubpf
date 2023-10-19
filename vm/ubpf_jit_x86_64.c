@@ -915,7 +915,8 @@ my_translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct 
             emit1(state,0x00);
             emit1(state,0x00);
 
-            emit_jcc(state, 0x85, target_pc);
+            emit_jcc(state, 0x85, groups[processed_index].fail_target);
+            emit_jcc(state, 0x84, groups[processed_index].success_target);
             continue;
         }
         else if(in_packed_section)
@@ -1686,6 +1687,10 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
         groups[group_index].end = jumps[i].loc;
         
         jumps[i].group = group_id;
+        if (jumps[i].opcode == EBPF_OP_JNE_REG)
+            groups[group_index].fail_target =  jumps[i].target_pc;
+        else
+            groups[group_index].success_target =  jumps[i].target_pc;
     }
     *num_groups = group_index + 1;
     for (i = 0; i< group_index; i++)
