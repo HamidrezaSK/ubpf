@@ -18,21 +18,21 @@ def plot(vanila_jit, modified_jit, aot, x86, cache):
 
 
     # Customize the plot
-    axs[0].set_xlabel('Key')
+    axs[0].set_xlabel('Rules Number')
     axs[0].set_ylabel('Execution Time')
     axs[0].set_title('Mean Execution Times for Different Modes ' + cache)
     axs[0].set_xticks(keys)
     axs[0].legend()
     axs[0].grid(True)
 
-    axs[1].set_xlabel('Key')
+    axs[1].set_xlabel('Rules Number')
     axs[1].set_ylabel('Execution Time')
     axs[1].set_title('Min Execution Times for Different Modes ' + cache)
     axs[1].set_xticks(keys)
     axs[1].legend()
     axs[1].grid(True)
 
-    axs[2].set_xlabel('Key')
+    axs[2].set_xlabel('Rules Number')
     axs[2].set_ylabel('Execution Time')
     axs[2].set_title('Max Execution Times for Different Modes ' + cache)
     axs[2].set_xticks(keys)
