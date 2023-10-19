@@ -74,6 +74,7 @@ struct jump_ana
     uint32_t loc;
     uint32_t target_pc;
     uint32_t group;
+    uint8_t opcode;
 };
 
 struct load
