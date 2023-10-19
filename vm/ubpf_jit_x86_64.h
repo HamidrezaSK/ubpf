@@ -66,7 +66,10 @@ struct packed_group
     uint32_t section_id;                    // need this to connect the batches together. each compare group has a unique one
     uint32_t start;                           // what is the first location, to start the reduction
     uint32_t end;                           // what is the last location, to end the reduction phase
-    uint32_t size;                          // how many compares are in this group                    
+    uint32_t size;                         // how many compares are in this group
+    uint32_t success_target;               // where to jump in case of success             
+    uint32_t fail_target;                  // where to jump in case of failure               
+
 };
 
 struct jump_ana
