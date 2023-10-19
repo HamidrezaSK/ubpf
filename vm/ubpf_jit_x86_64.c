@@ -1581,19 +1581,34 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
 
         switch (inst.opcode) {
         case EBPF_OP_JNE_REG:
-            if(!is_duplicate(target_pc, targets,target_index))
+            printf("checking jump not equal instruction is in line %d, target_pc: %d, target_index: %ld\n",i ,target_pc, target_index);
+            if(!is_duplicate(target_pc, targets,target_index)) // Trying to find lables or jump targets in the assembly code
             {
                 targets[target_index] = target_pc;
                 target_index++;
             }
-            jumps[num_jumps].target_pc = target_pc;
+            jumps[num_jumps].target_pc = target_pc;     // Add the jump to the available jumps
             jumps[num_jumps].loc = i;
+            jumps[num_jumps].opcode = EBPF_OP_JNE_REG;
+            num_jumps++;
+            break;
+        case EBPF_OP_JEQ_REG:
+            printf("checking jump not equal instruction is in line %d, target_pc: %d, target_index: %ld\n",i ,target_pc, target_index);
+            if(!is_duplicate(target_pc, targets,target_index)) // Trying to find lables or jump targets in the assembly code
+            {
+                targets[target_index] = target_pc;
+                target_index++;
+            }
+            jumps[num_jumps].target_pc = target_pc;     // Add the jump to the available jumps
+            jumps[num_jumps].loc = i;
+            jumps[num_jumps].opcode = EBPF_OP_JEQ_REG;
+
             num_jumps++;
             break;
         case EBPF_OP_JNE_IMM:
         case EBPF_OP_JA:
         case EBPF_OP_JEQ_IMM:
-        case EBPF_OP_JEQ_REG:
+
         case EBPF_OP_JGT_IMM:
         case EBPF_OP_JGT_REG:
         case EBPF_OP_JGE_IMM:
@@ -1645,16 +1660,18 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
             break;
         }
     }
-    qsort (targets, target_index, sizeof(*targets), comp);
-    // for (i = 0;i<target_index;i++)
-    // {
-    //     printf("Lable at %d \n",targets[i]);
-    // }
+    qsort (targets, target_index, sizeof(*targets), comp);      // Sorting the lables
+    for (i = 0;i<target_index;i++)
+    {
+        printf("Lable at %d \n",targets[i]);
+    }
     int group_index = -1;
     int group_id;
     groups[0].size = 0;
     groups[0].section_id = -1;
-    for(i = 0;i<num_jumps;i++)
+     // here I want to group the jumps togather in groups of 4, the first three are going to be JNE
+     // The last jump should be JE
+    for(i = 0;i<num_jumps;i++)  // here I am assuming that I have just one batch jump in a section which is not a good assumption
     {
         group_id = get_group(targets,target_index,jumps[i].loc);
         if (group_index == -1 || groups[group_index].section_id != group_id){
@@ -1671,9 +1688,9 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
         jumps[i].group = group_id;
     }
     *num_groups = group_index + 1;
-    // for (i = 0; i< group_index; i++)
-    //     printf("group compare in section %d, started at %d, ended at %d, size is %d\n",
-    //                                     groups[i].section_id, groups[i].start, groups[i].end, groups[i].size);
+    for (i = 0; i< group_index; i++)
+        printf("group compare in section %d, started at %d, ended at %d, size is %d\n",
+                                        groups[i].section_id, groups[i].start, groups[i].end, groups[i].size);
 
     return 0;
 }
