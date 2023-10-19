@@ -1582,7 +1582,7 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
 
         switch (inst.opcode) {
         case EBPF_OP_JNE_REG:
-            printf("checking jump not equal instruction is in line %d, target_pc: %d, target_index: %ld\n",i ,target_pc, target_index);
+            // printf("checking jump not equal instruction is in line %d, target_pc: %d, target_index: %ld\n",i ,target_pc, target_index);
             if(!is_duplicate(target_pc, targets,target_index)) // Trying to find lables or jump targets in the assembly code
             {
                 targets[target_index] = target_pc;
@@ -1594,7 +1594,7 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
             num_jumps++;
             break;
         case EBPF_OP_JEQ_REG:
-            printf("checking jump not equal instruction is in line %d, target_pc: %d, target_index: %ld\n",i ,target_pc, target_index);
+            // printf("checking jump not equal instruction is in line %d, target_pc: %d, target_index: %ld\n",i ,target_pc, target_index);
             if(!is_duplicate(target_pc, targets,target_index)) // Trying to find lables or jump targets in the assembly code
             {
                 targets[target_index] = target_pc;
@@ -1662,10 +1662,10 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
         }
     }
     qsort (targets, target_index, sizeof(*targets), comp);      // Sorting the lables
-    for (i = 0;i<target_index;i++)
-    {
-        printf("Lable at %d \n",targets[i]);
-    }
+    // for (i = 0;i<target_index;i++)
+    // {
+    //     printf("Lable at %d \n",targets[i]);
+    // }
     int group_index = -1;
     int group_id;
     groups[0].size = 0;
@@ -1693,9 +1693,9 @@ analyse_jmp(struct ubpf_vm* vm, struct jump_ana* jumps, struct packed_group* gro
             groups[group_index].success_target =  jumps[i].target_pc;
     }
     *num_groups = group_index + 1;
-    for (i = 0; i< group_index; i++)
-        printf("group compare in section %d, started at %d, ended at %d, size is %d\n",
-                                        groups[i].section_id, groups[i].start, groups[i].end, groups[i].size);
+    // for (i = 0; i< group_index; i++)
+    //     printf("group compare in section %d, started at %d, ended at %d, size is %d\n",
+    //                                     groups[i].section_id, groups[i].start, groups[i].end, groups[i].size);
 
     return 0;
 }
