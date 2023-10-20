@@ -1,7 +1,7 @@
 #!/bin/bash
 
 sudo apt update
-sudo apt install -y llvm clang python3-pip libboost-all-dev libbpf-dev cmake cpufrequtils libelf-dev libpcap-dev build-essential linux-tools-common linux-tools-generic tcpdump libc6-dev-i386 htop
+sudo apt install -y llvm clang python3-pip libboost-all-dev libbpf-dev cmake cpufrequtils libelf-dev libpcap-dev build-essential linux-tools-common linux-tools-generic tcpdump libc6-dev-i386 htop linux-tools-5.15.0-86-generic linux-cloud-tools-5.15.0-86-generic
 
 
 cd ..
