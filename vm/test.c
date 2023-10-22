@@ -35,6 +35,10 @@
 #include "ubpf.h"
 
 #include "../bpf/bpf.h"
+#include <sys/ioctl.h>
+#include <linux/perf_event.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 #if defined(UBPF_HAS_ELF_H)
 #if defined(UBPF_HAS_ELF_H_COMPAT)
@@ -177,6 +181,17 @@ map_relocation_bounds_check_function(void* user_context, uint64_t addr, uint64_t
         }
     }
     return false;
+}
+
+static long
+perf_event_open(struct perf_event_attr *hw_event, pid_t pid,
+                int cpu, int group_fd, unsigned long flags)
+{
+    int ret;
+
+    ret = syscall(SYS_perf_event_open, hw_event, pid, cpu,
+                    group_fd, flags);
+    return ret;
 }
 
 int
@@ -347,12 +362,68 @@ load:
             free(mem);
             return 1;
         }
-        clock_t begin = clock();
+
+        // clock_t begin = clock();
+        struct perf_event_attr pe[2];
+        int fd[2];
+
+    
+        // Configure Total instructions
+        memset(&pe[0], 0, sizeof(struct perf_event_attr));
+        pe[0].type = PERF_TYPE_HARDWARE;
+        pe[0].config = PERF_COUNT_HW_INSTRUCTIONS;
+        pe[0].size = sizeof(struct perf_event_attr);
+        pe[0].disabled = 1;
+
+        // Configure Total cycles
+        memset(&pe[1], 0, sizeof(struct perf_event_attr));
+        pe[1].type = PERF_TYPE_HARDWARE;
+        pe[1].config = PERF_COUNT_HW_CPU_CYCLES;
+        pe[1].size = sizeof(struct perf_event_attr);
+        pe[1].disabled = 1;
+
+        // Create counters
+        for (int i = 0; i < 2; i++) {
+            fd[i] = perf_event_open(&pe[i], 0, -1, -1, 0);
+            if (fd[i] == -1) {
+                perror("Error opening the event");
+                exit(EXIT_FAILURE);
+            }
+        }
+        // Start counters
+        for (int i = 0; i < 2; i++) {
+            ioctl(fd[i], PERF_EVENT_IOC_RESET, 0);
+            ioctl(fd[i], PERF_EVENT_IOC_ENABLE, 0);
+        }
+
 
         for(i = 0; i < TRIAL_NUM ; ++i){
             ret = fn(mem, mem_len);
         }
-        time_spent += (double)(clock() - begin) / CLOCKS_PER_SEC;
+
+        for (int i = 0; i < 2; i++) {
+            ioctl(fd[i], PERF_EVENT_IOC_DISABLE, 0);
+        }
+
+        // Read and print results
+        long long count[2];
+        for (int i = 0; i < 2; i++) {
+            if(read(fd[i], &count[i], sizeof(long long)) == -1)
+            {
+                perror("Error reading results");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+
+        printf("Total cycles: %lld\n", count[0]);
+        printf("Total instructions: %lld\n", count[1]);
+
+        // Close counters
+        for (int i = 0; i < 2; i++) {
+            close(fd[i]);
+        }
+        // time_spent += (double)(clock() - begin) / CLOCKS_PER_SEC;
 
     } else {
         clock_t begin = clock();
