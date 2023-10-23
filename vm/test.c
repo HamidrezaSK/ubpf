@@ -426,19 +426,70 @@ load:
         // time_spent += (double)(clock() - begin) / CLOCKS_PER_SEC;
 
     } else {
-        clock_t begin = clock();
+        struct perf_event_attr pe[2];
+        int fd[2];
+
+    
+        // Configure Total instructions
+        memset(&pe[0], 0, sizeof(struct perf_event_attr));
+        pe[0].type = PERF_TYPE_HARDWARE;
+        pe[0].config = PERF_COUNT_HW_INSTRUCTIONS;
+        pe[0].size = sizeof(struct perf_event_attr);
+        pe[0].disabled = 1;
+
+        // Configure Total cycles
+        memset(&pe[1], 0, sizeof(struct perf_event_attr));
+        pe[1].type = PERF_TYPE_HARDWARE;
+        pe[1].config = PERF_COUNT_HW_CPU_CYCLES;
+        pe[1].size = sizeof(struct perf_event_attr);
+        pe[1].disabled = 1;
+
+        // Create counters
+        for (int i = 0; i < 2; i++) {
+            fd[i] = perf_event_open(&pe[i], 0, -1, -1, 0);
+            if (fd[i] == -1) {
+                perror("Error opening the event");
+                exit(EXIT_FAILURE);
+            }
+        }
+        // Start counters
+        for (int i = 0; i < 2; i++) {
+            ioctl(fd[i], PERF_EVENT_IOC_RESET, 0);
+            ioctl(fd[i], PERF_EVENT_IOC_ENABLE, 0);
+        }
+
         for(i = 0; i < TRIAL_NUM ; ++i)
             ubpf_exec(vm, mem, mem_len, &ret);
-        time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
-        // if (ubpf_exec(vm, mem, mem_len, &ret) < 0)
-        //     ret = UINT64_MAX;
+
+        for (int i = 0; i < 2; i++) {
+            ioctl(fd[i], PERF_EVENT_IOC_DISABLE, 0);
+        }
+
+        // Read and print results
+        long long count[2];
+        for (int i = 0; i < 2; i++) {
+            if(read(fd[i], &count[i], sizeof(long long)) == -1)
+            {
+                perror("Error reading results");
+                exit(EXIT_FAILURE);
+            }
+        }
+
+
+        printf("Total cycles: %lld\n", count[0]);
+        printf("Total instructions: %lld\n", count[1]);
+
+        // Close counters
+        for (int i = 0; i < 2; i++) {
+            close(fd[i]);
+        }
+
     }
 
     printf("0x%" PRIx64 "\n", ret);
 
     ubpf_destroy(vm);
     free(mem);
-    printf("Average execution time: %.7f\n",time_spent);
     return 0;
 }
 

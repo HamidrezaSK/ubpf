@@ -11,6 +11,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
+#include <sys/ioctl.h>
+#include <linux/perf_event.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
 
 
 #include "../../common/parsing_helpers.h"
@@ -379,20 +384,74 @@ int main(int argc, char *argv[])
 {
     size_t mem_len = 0;
     char *path = argv[1];
-    
+
     void* mem = readfile(path, 1024 * 1024, &mem_len);
     int i;
     volatile int ret =0;
-    clock_t begin = clock();
+
+
+    struct perf_event_attr pe[2];
+    int fd[2];
+
+   
+    // Configure Total instructions
+    memset(&pe[0], 0, sizeof(struct perf_event_attr));
+    pe[0].type = PERF_TYPE_HARDWARE;
+    pe[0].config = PERF_COUNT_HW_INSTRUCTIONS;
+    pe[0].size = sizeof(struct perf_event_attr);
+    pe[0].disabled = 1;
+
+    // Configure Total cycles
+    memset(&pe[1], 0, sizeof(struct perf_event_attr));
+    pe[1].type = PERF_TYPE_HARDWARE;
+    pe[1].config = PERF_COUNT_HW_CPU_CYCLES;
+    pe[1].size = sizeof(struct perf_event_attr);
+    pe[1].disabled = 1;
+
+    // Create counters
+    for (int i = 0; i < 2; i++) {
+        fd[i] = perf_event_open(&pe[i], 0, -1, -1, 0);
+        if (fd[i] == -1) {
+            perror("Error opening the event");
+            exit(EXIT_FAILURE);
+        }
+    }
+    // Start counters
+    for (int i = 0; i < 2; i++) {
+        ioctl(fd[i], PERF_EVENT_IOC_RESET, 0);
+        ioctl(fd[i], PERF_EVENT_IOC_ENABLE, 0);
+    }
+
+    // clock_t begin = clock();
 
     for(i = 0; i < TRIAL_NUM ; ++i)
     {
         ret = xdp_firewall_func(mem, mem_len);
     }
-    double time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
+    // double time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
+
+    for (int i = 0; i < 2; i++) {
+        ioctl(fd[i], PERF_EVENT_IOC_DISABLE, 0);
+    }
+
+    // Read and print results
+    long long count[2];
+    for (int i = 0; i < 2; i++) {
+        read(fd[i], &count[i], sizeof(long long));
+    }
+
+
+    printf("Total cycles: %lld\n", count[0]);
+    printf("Total instructions: %lld\n", count[1]);
+
+    // Close counters
+    for (int i = 0; i < 2; i++) {
+        close(fd[i]);
+    }
+
     printf("ret: %d\n",ret);
 
-    printf("Average execution time: %.7f\n",time_spent);
+    // printf("Average execution time: %.7f\n",time_spent);
 
     return 0;
 }
