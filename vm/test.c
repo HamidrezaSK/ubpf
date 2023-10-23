@@ -346,7 +346,7 @@ load:
     }
 
     uint64_t ret;
-    double time_spent = 0;
+    // double time_spent = 0;
     int i;
 
     if (jit) {
