@@ -250,7 +250,7 @@ main(int argc, char** argv)
         case 'R':
             reload = true;
             break;
-        case 'v':
+        case 'v':           // Modified JIT option (You need -j and -v to activate this)
             my_jit = true;
             break;
         default:
@@ -351,10 +351,10 @@ load:
 
     if (jit) {
         ubpf_jit_fn fn;
-        if(!my_jit)
-            fn = ubpf_compile(vm, &errmsg, 1);
+        if(!my_jit) 
+            fn = ubpf_compile(vm, &errmsg, 1);      // Vanila Compilation
         else
-            fn = ubpf_compile(vm, &errmsg, 0);
+            fn = ubpf_compile(vm, &errmsg, 0);      // Modified Compilation
 
         if (fn == NULL) {
             fprintf(stderr, "Failed to compile: %s\n", errmsg);

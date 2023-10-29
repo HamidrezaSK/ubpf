@@ -833,61 +833,17 @@ my_translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct 
              */
             emit_alu64_imm32(state, 0x81, 5, RSP, 8);
         }
-
-        // if(i == 0)
-        // {
-        //     emit1(state,0x49);      // move lower mask to r10
-        //     emit1(state,0xba);
-        //     emit1(state,0x03);
-        //     emit1(state,0x02);
-        //     emit1(state,0x01);
-        //     emit1(state,0x00);
-        //     emit1(state,0x07);
-        //     emit1(state,0x06);
-        //     emit1(state,0x05);
-        //     emit1(state,0x04);
-
-        //     emit1(state,0x49);      // move higher mask to r11
-        //     emit1(state,0xbb);
-        //     emit1(state,0x0b);
-        //     emit1(state,0x0a);
-        //     emit1(state,0x09);
-        //     emit1(state,0x08);
-        //     emit1(state,0x0f);
-        //     emit1(state,0x0e);
-        //     emit1(state,0x0d);
-        //     emit1(state,0x0c);
-
-        //     emit1(state,0xc4);      //move lower mask from r10 to xmm2
-        //     emit1(state,0xc1);
-        //     emit1(state,0xf9);
-        //     emit1(state,0x6e);
-        //     emit1(state,0xd2);
-
-        //     emit1(state,0xc4);      //move higher mask from r11 to xmm3
-        //     emit1(state,0xc1);
-        //     emit1(state,0xf9);
-        //     emit1(state,0x6e);
-        //     emit1(state,0xdb);
-            
-        //     emit1(state,0xc5);      //merge xmm2 and xmm3 to xmm2
-        //     emit1(state,0xe9);
-        //     emit1(state,0x6c);
-        //     emit1(state,0xd3);
-            
-        // }
-
         if(i == loads[load_count].inst_offset )
         {
-            emit1(state, 0xf3);                 // movdqu xmmX, xmmword ptr[src+offset]
-            emit_basic_rex(state,0,0,src);
-            emit1(state, 0x0f);
+            emit1(state, 0xf3);                 // movdqu xmmX, xmmword ptr[src+offset] 
+            emit_basic_rex(state,0,0,src);      // Loading input packet and Firewall rules to xmmX registers
+            emit1(state, 0x0f);                 
             emit1(state, 0x6f);
             emit_modrm_and_displacement(state, load_count!=0, src, inst.offset);
 
             // if(load_count == 0)
             // {
-            //     //simd byteswap for xmm0 on xmm2 mask
+            //     //Trying aligned load to get more performance
             //     emit1(state,0x66);  
             //     emit1(state,0x0f);
             //     emit1(state,0x38);
@@ -901,22 +857,22 @@ my_translate(struct ubpf_vm* vm, struct jit_state* state, char** errmsg, struct 
             in_packed_section = true;
             emit_sse_alu64(state, 0x0F, 0x76, XMM1, XMM0, 0); //doing the comparison
 
-            emit1(state,0x66);      //move xmm1 to r11d
-            emit1(state,0x44);
+            emit1(state,0x66);      // move xmm1 to r11d
+            emit1(state,0x44);      // moving result of comparison to a general register
             emit1(state,0x0f);
             emit1(state,0xd7);
             emit1(state,0xd9);
 
             emit1(state,0x41);      //compare r11d to 0xffff
-            emit1(state,0x81);
+            emit1(state,0x81);      // setting flags
             emit1(state,0xfb);
             emit1(state,0xff);
             emit1(state,0xff);
             emit1(state,0x00);
             emit1(state,0x00);
 
-            emit_jcc(state, 0x85, groups[processed_index].fail_target);
-            emit_jcc(state, 0x84, groups[processed_index].success_target);
+            emit_jcc(state, 0x85, groups[processed_index].fail_target);     // Perform jump if fail
+            emit_jcc(state, 0x84, groups[processed_index].success_target);  // Perform jump if success
             continue;
         }
         else if(in_packed_section)
@@ -1851,26 +1807,28 @@ ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** 
     state.jumps = calloc(UBPF_MAX_INSTS, sizeof(state.jumps[0]));
     state.num_jumps = 0;
 
-    struct jump_ana* my_jne = calloc(UBPF_MAX_INSTS, sizeof(my_jne[0]));
-    struct packed_group* groups = calloc(UBPF_MAX_INSTS, sizeof(groups[0]));
-    struct load* packed_loads = calloc(UBPF_MAX_INSTS, sizeof(packed_loads[0]));
+    struct jump_ana* my_jne = calloc(UBPF_MAX_INSTS, sizeof(my_jne[0])); // Jumps existing in our code
+    struct packed_group* groups = calloc(UBPF_MAX_INSTS, sizeof(groups[0])); // Group jumps (each jump belongs to one of these groups)
+    struct load* packed_loads = calloc(UBPF_MAX_INSTS, sizeof(packed_loads[0])); // packed loads
     
-    if(vanila)
+    if(vanila)  
     {
         if (translate(vm, &state, errmsg) < 0) {
             goto out;
         }
     }
-    else
+    else  // This mode is for vector comparisons 
     {
+          // Finding group data loads to put them inside XMM registers
         if (analyse(vm, packed_loads, &num_vec_loads) < 0) {
             goto out;
         }
-
+            // Finding comparisons where we actually change the code
+            // TODO: Mapping each group comparison to a XMM register to make it more general
         if (analyse_jmp(vm, my_jne, groups, &num_groups) < 0) {
             goto out;
         }
-
+            // Changed JIT translation function (in this version we delete the whole comparison segment and replace it with our vectorized comparison)
         if (my_translate(vm, &state, errmsg, packed_loads, groups, num_groups) < 0) {
             goto out;
         }
