@@ -364,66 +364,83 @@ load:
         }
 
         // clock_t begin = clock();
-        struct perf_event_attr pe[2];
-        int fd[2];
+        struct perf_event_attr pe;
+        int fd;
 
-    
-        // Configure Total instructions
-        memset(&pe[0], 0, sizeof(struct perf_event_attr));
-        pe[0].type = PERF_TYPE_HARDWARE;
-        pe[0].config = PERF_COUNT_HW_INSTRUCTIONS;
-        pe[0].size = sizeof(struct perf_event_attr);
-        pe[0].disabled = 1;
+        memset(&pe, 0, sizeof(struct perf_event_attr));
+        pe.type = PERF_TYPE_HARDWARE;
+        pe.config = PERF_COUNT_HW_INSTRUCTIONS;
+        pe.size = sizeof(struct perf_event_attr);
+        pe.disabled = 1;
 
-        // Configure Total cycles
-        memset(&pe[1], 0, sizeof(struct perf_event_attr));
-        pe[1].type = PERF_TYPE_HARDWARE;
-        pe[1].config = PERF_COUNT_HW_CPU_CYCLES;
-        pe[1].size = sizeof(struct perf_event_attr);
-        pe[1].disabled = 1;
-
-        // Create counters
-        for (int i = 0; i < 2; i++) {
-            fd[i] = perf_event_open(&pe[i], 0, -1, -1, 0);
-            if (fd[i] == -1) {
-                perror("Error opening the event");
-                exit(EXIT_FAILURE);
-            }
+        fd = perf_event_open(&pe, 0, -1, -1, 0);
+        if (fd == -1) {
+            perror("Error opening the event");
+            exit(EXIT_FAILURE);
         }
-        // Start counters
-        for (int i = 0; i < 2; i++) {
-            ioctl(fd[i], PERF_EVENT_IOC_RESET, 0);
-            ioctl(fd[i], PERF_EVENT_IOC_ENABLE, 0);
-        }
+
+        // Start the counter
+        ioctl(fd, PERF_EVENT_IOC_RESET, 0);
+        ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
 
 
         for(i = 0; i < TRIAL_NUM ; ++i){
             ret = fn(mem, mem_len);
         }
 
-        for (int i = 0; i < 2; i++) {
-            ioctl(fd[i], PERF_EVENT_IOC_DISABLE, 0);
+        // Disable the counter
+        ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
+
+        // Read and return the count
+        long long count;
+        if (read(fd, &count, sizeof(long long)) == -1) {
+            perror("Error reading results");
+            exit(EXIT_FAILURE);
         }
 
-        // Read and print results
-        long long count[2];
-        for (int i = 0; i < 2; i++) {
-            if(read(fd[i], &count[i], sizeof(long long)) == -1)
-            {
-                perror("Error reading results");
-                exit(EXIT_FAILURE);
-            }
+        close(fd);
+        printf("Total instructions: %lld\n", count);
+
+        memset(&pe, 0, sizeof(struct perf_event_attr));
+        pe.type = PERF_TYPE_HARDWARE;
+        pe.config = PERF_COUNT_HW_CPU_CYCLES;
+        pe.size = sizeof(struct perf_event_attr);
+        pe.disabled = 1;
+
+        fd = perf_event_open(&pe, 0, -1, -1, 0);
+        if (fd == -1) {
+            perror("Error opening the event");
+            exit(EXIT_FAILURE);
         }
 
+        ioctl(fd, PERF_EVENT_IOC_RESET, 0);
+        ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
 
-        printf("Total cycles: %lld\n", count[0]);
-        printf("Total instructions: %lld\n", count[1]);
-
-        // Close counters
-        for (int i = 0; i < 2; i++) {
-            close(fd[i]);
+        for(i = 0; i < TRIAL_NUM ; ++i){
+            ret = fn(mem, mem_len);
         }
-        // time_spent += (double)(clock() - begin) / CLOCKS_PER_SEC;
+
+        ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
+
+        // Read and return the count
+        if (read(fd, &count, sizeof(long long)) == -1) {
+            perror("Error reading results");
+            exit(EXIT_FAILURE);
+        }
+
+        close(fd);
+
+        printf("Total cycles: %lld\n", count);
+
+        clock_t begin = clock();
+        for(i = 0; i < TRIAL_NUM ; ++i){
+            ret = fn(mem, mem_len);
+        }
+
+        double time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
+
+        printf("Average execution time: %.7f\n", time_spent);
+
 
     } else {
         struct perf_event_attr pe[2];
