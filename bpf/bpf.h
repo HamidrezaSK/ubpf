@@ -11,6 +11,7 @@ static void* (*bpf_map_lookup_elem)(void* map, const void* key) = (void* (*)(voi
 static int (*bpf_map_update_elem)(void* map, const void* key, const void* value, unsigned long flags) =
     (int (*)(void*, const void*, const void*, unsigned long))7;
 static int (*bpf_map_delete_elem)(void* map, const void* key) = (int (*)(void*, const void*))8;
+static int (*bpf_xdp_adjust_head)(void* xdp_md, int delta) = (int (*)(void*, int))44;
 
 #define BPF_MAP_TYPE_ARRAY 2
 

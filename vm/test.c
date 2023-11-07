@@ -22,6 +22,7 @@
 
 #define TRIAL_NUM 1000000
 #define _GNU_SOURCE
+#include <linux/ipv6.h>
 #include <inttypes.h>
 #include <time.h>
 #include <stdlib.h>
@@ -677,6 +678,18 @@ bpf_map_delete_elem_impl(struct bpf_map* map, const void* key)
     }
 }
 
+static int
+bpf_xdp_adjust_head_impl(void* xdp_md, int delta)
+{
+    unsigned char *new_xdp_md = (unsigned char *)xdp_md + delta;
+
+    if(delta > sizeof(struct ipv6hdr))
+        return -1;
+
+    xdp_md = new_xdp_md;
+    return 0; 
+}
+
 static void
 register_functions(struct ubpf_vm* vm)
 {
@@ -690,4 +703,6 @@ register_functions(struct ubpf_vm* vm)
     ubpf_register(vm, (unsigned int)(uintptr_t)bpf_map_lookup_elem, "bpf_map_lookup_elem", bpf_map_lookup_elem_impl);
     ubpf_register(vm, (unsigned int)(uintptr_t)bpf_map_update_elem, "bpf_map_update_elem", bpf_map_update_elem_impl);
     ubpf_register(vm, (unsigned int)(uintptr_t)bpf_map_delete_elem, "bpf_map_delete_elem", bpf_map_delete_elem_impl);
+    ubpf_register(vm, (int)(uintptr_t)bpf_xdp_adjust_head, "bpf_xdp_adjust_head", bpf_xdp_adjust_head_impl);
+
 }
