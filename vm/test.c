@@ -205,7 +205,8 @@ main(int argc, char** argv)
         },
         {.name = "mem", .val = 'm', .has_arg = 1},
         {.name = "jit", .val = 'j'},
-        {.name = "vanila", .val = 'v'},
+        {.name = "compare", .val = 'v'},
+        {.name = "copy", .val = 'c'},
         {.name = "data", .val = 'd'},
         {.name = "register-offset", .val = 'r', .has_arg = 1},
         {.name = "unload", .val = 'U'}, /* for unit test only */
@@ -219,13 +220,15 @@ main(int argc, char** argv)
     bool unload = false;
     bool reload = false;
     bool data_relocation = false; // treat R_BPF_64_64 as relocations to maps by default.
-    bool my_jit = false; // use my jit
+    bool my_compare = false; // use my jit for compare
+    bool my_copy = false; // use my jit for memcpy
+
 
 
     uint64_t secret = (uint64_t)rand() << 32 | (uint64_t)rand();
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "hm:vjdr:URs:", longopts, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "hm:cvjdr:URs:", longopts, NULL)) != -1) {
         switch (opt) {
         case 'm':
             mem_filename = optarg;
@@ -251,8 +254,11 @@ main(int argc, char** argv)
         case 'R':
             reload = true;
             break;
-        case 'v':           // Modified JIT option (You need -j and -v to activate this)
-            my_jit = true;
+        case 'v':           // Modified JIT option for compare (You need -j and -v to activate this)
+            my_compare = true;
+            break;
+        case 'c':           // Modified JIT option for memcpy (You need -j and -c to activate this)
+            my_copy = true;
             break;
         default:
             usage(argv[0]);
@@ -267,6 +273,10 @@ main(int argc, char** argv)
 
     if (argc != optind + 1) {
         usage(argv[0]);
+        return 1;
+    }
+    if (my_copy && my_compare){ // For now our optimizations are isolated, not together
+        fprintf(stderr, "-c and -v can not be used together\n");
         return 1;
     }
 
@@ -352,10 +362,12 @@ load:
 
     if (jit) {
         ubpf_jit_fn fn;
-        if(!my_jit) 
-            fn = ubpf_compile(vm, &errmsg, 1);      // Vanila Compilation
+        if(my_compare) 
+            fn = ubpf_compile(vm, &errmsg, 1);      // Compare Optimization
+        else if(my_copy)
+            fn = ubpf_compile(vm, &errmsg, 2);      // Memcpy Optimization
         else
-            fn = ubpf_compile(vm, &errmsg, 0);      // Modified Compilation
+            fn = ubpf_compile(vm, &errmsg, 0);      // Vanila Compilation
 
         if (fn == NULL) {
             fprintf(stderr, "Failed to compile: %s\n", errmsg);
