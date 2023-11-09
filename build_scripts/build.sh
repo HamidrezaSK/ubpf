@@ -45,3 +45,20 @@ clang -g -O2 xdp_prog_16.c -o xdp_prog_16
 clang -g -O2 xdp_prog_32.c -o xdp_prog_32
 clang -g -O2 xdp_prog_8.c -o xdp_prog_8
 clang -g -O2 xdp_prog_64.c -o xdp_prog_64
+
+# Change back to the previous directory
+cd -
+
+# Change directory to vec_instances/eBPF/encap/bpf
+cd vec_instances/eBPF/encap/bpf/
+
+# Run the Python script
+python packet_gen_random.py
+
+cd -
+
+# Compile eBPF programs
+clang -O2 -target bpf -c vec_instances/eBPF/encap/bpf/memcpy_v6_1.c -o vec_instances/eBPF/encap/bpf/memcpy_v6_1.o
+
+clang -O2 -c vec_instances/eBPF/encap/x86/memcpy_v6_1.c -o vec_instances/eBPF/encap/x86/memcpy_v6_1.o
+
