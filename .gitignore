@@ -22,7 +22,6 @@ sdist/
 var/
 wheels/
 assembly/
-*.opt.yaml
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -121,3 +120,7 @@ dmypy.json
 .vs/
 
 *.mem
+
+
+# opt.viewer files
+*.opt.yaml
