@@ -10,7 +10,7 @@ cd ../
 
 # Define the commands to run
 commands=(
-  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/encap/bpf/memcpy_v6_1.o -d -j -m vec_instances/eBPF/encap/bpf/ipv6_in.mem"
+  "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/encap/bpf/memcpy_v6_1.o -d -j -m vec_instances/eBPF/encap/bpf/ipv6_in_1.mem"
 )
 
 # Log file
@@ -30,7 +30,7 @@ done
 
 
 commands=(
-    "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/encap/bpf/memcpy_v6_1.o -c -d -j -m vec_instances/eBPF/encap/bpf/ipv6_in.mem"
+    "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/encap/bpf/memcpy_v6_1.o -c -d -j -m vec_instances/eBPF/encap/bpf/ipv6_in_1.mem"
 )
 
 # Log file
@@ -48,7 +48,7 @@ for command in "${commands[@]}"; do
 done
 
 commands=(
-    "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/encap/bpf/memcpy_v6_1.o -d -m vec_instances/eBPF/encap/bpf/ipv6_in.mem"
+    "taskset 0x200 build/bin/ubpf_test vec_instances/eBPF/encap/bpf/memcpy_v6_1.o -d -m vec_instances/eBPF/encap/bpf/ipv6_in_1.mem"
 )
 
 # Log file
@@ -67,7 +67,7 @@ done
 
 
 commands=(
-  "taskset 0x200 ./vec_instances/eBPF/encap/x86/memcpy_v6_1.o vec_instances/eBPF/encap/x86/ipv6_in.mem"
+  "taskset 0x200 ./vec_instances/eBPF/encap/x86/memcpy_v6_1.o vec_instances/eBPF/encap/x86/ipv6_in_1.mem"
 )
 
 # Log file
