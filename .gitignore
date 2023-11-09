@@ -22,6 +22,7 @@ sdist/
 var/
 wheels/
 assembly/
+*.opt.yaml
 share/python-wheels/
 *.egg-info/
 .installed.cfg
