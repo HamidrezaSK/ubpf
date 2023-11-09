@@ -14,8 +14,14 @@
 #include <linux/ipv6.h>
 #include <string.h>
 #include <netinet/ether.h>
+#include <linux/perf_event.h>
+#include <sys/syscall.h>
+#include <time.h>
+
 
 #define NUM_PCKTS 1
+#define TRIAL_NUM 1000000
+
 
 #ifndef IPIP_V6_PREFIX1
 #define IPIP_V6_PREFIX1 1
@@ -196,6 +202,17 @@ readfile(const char* path, size_t maxlen, size_t* len)
     return (void*)data;
 }
 
+static long
+perf_event_open(struct perf_event_attr *hw_event, pid_t pid,
+                int cpu, int group_fd, unsigned long flags)
+{
+    int ret;
+
+    ret = syscall(SYS_perf_event_open, hw_event, pid, cpu,
+                    group_fd, flags);
+    return ret;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -204,12 +221,85 @@ int main(int argc, char *argv[])
 
     void* mem = readfile(path, 1024 * 1024, &mem_len);
     int i;
-    bool ret;
-    // size_t packet_len[NUM_PCKTS];
-    // for(i =0;i<NUM_PCKTS;i++)
-    //   packet_len[i] = mem_len/8;
+    volatile int ret;
 
-    ret = xdp_load_balancer(mem, mem_len);
+    struct perf_event_attr pe;
+    int fd;
+
+    memset(&pe, 0, sizeof(struct perf_event_attr));
+    pe.type = PERF_TYPE_HARDWARE;
+    pe.config = PERF_COUNT_HW_INSTRUCTIONS;
+    pe.size = sizeof(struct perf_event_attr);
+    pe.disabled = 1;
+
+    fd = perf_event_open(&pe, 0, -1, -1, 0);
+    if (fd == -1) {
+        perror("Error opening the event");
+        exit(EXIT_FAILURE);
+    }
+
+    // Start the counter
+    ioctl(fd, PERF_EVENT_IOC_RESET, 0);
+    ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
+
+
+    for(i = 0; i < TRIAL_NUM ; ++i){
+        ret = xdp_load_balancer(mem, mem_len);
+    }
+
+    // Disable the counter
+    ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
+
+    // Read and return the count
+    long long count;
+    if (read(fd, &count, sizeof(long long)) == -1) {
+        perror("Error reading results");
+        exit(EXIT_FAILURE);
+    }
+
+    close(fd);
+    printf("Total instructions: %lld\n", count);
+
+    memset(&pe, 0, sizeof(struct perf_event_attr));
+    pe.type = PERF_TYPE_HARDWARE;
+    pe.config = PERF_COUNT_HW_CPU_CYCLES;
+    pe.size = sizeof(struct perf_event_attr);
+    pe.disabled = 1;
+
+    fd = perf_event_open(&pe, 0, -1, -1, 0);
+    if (fd == -1) {
+        perror("Error opening the event");
+        exit(EXIT_FAILURE);
+    }
+
+    ioctl(fd, PERF_EVENT_IOC_RESET, 0);
+    ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
+
+    for(i = 0; i < TRIAL_NUM ; ++i){
+        ret = xdp_load_balancer(mem, mem_len);
+    }
+
+    ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
+
+    // Read and return the count
+    if (read(fd, &count, sizeof(long long)) == -1) {
+        perror("Error reading results");
+        exit(EXIT_FAILURE);
+    }
+
+    close(fd);
+
+    printf("Total cycles: %lld\n", count);
+
+    clock_t begin = clock();
+    for(i = 0; i < TRIAL_NUM ; ++i){
+        ret = xdp_load_balancer(mem, mem_len);
+    }
+
+    double time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
+
+    printf("Average execution time: %.7f\n", time_spent);
+
 
     printf("ret: %d\n",ret);
 
