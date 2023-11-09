@@ -229,7 +229,7 @@ extern "C"
      * @return ubpf_jit_fn A pointer to the compiled program, or NULL on failure.
      */
     ubpf_jit_fn
-    ubpf_compile(struct ubpf_vm* vm, char** errmsg, bool vanila);
+    ubpf_compile(struct ubpf_vm* vm, char** errmsg, int vanila);
 
     /*
      * Translate the eBPF byte code to x64 machine code, store in buffer, and
@@ -255,7 +255,7 @@ extern "C"
      * @retval -1 Failure.
      */
     int
-    ubpf_translate(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg, bool vanila);
+    ubpf_translate(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** errmsg, int vanila);
 
     /**
      * @brief Instruct the uBPF runtime to apply unwind-on-success semantics to a helper function.
