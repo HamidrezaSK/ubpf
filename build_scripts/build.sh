@@ -60,5 +60,9 @@ cd -
 # Compile eBPF programs
 clang -O2 -target bpf -c vec_instances/eBPF/encap/bpf/memcpy_v6_1.c -o vec_instances/eBPF/encap/bpf/memcpy_v6_1.o
 
-clang -O2 -c vec_instances/eBPF/encap/x86/memcpy_v6_1.c -o vec_instances/eBPF/encap/x86/memcpy_v6_1.o
+cd vec_instances/eBPF/encap/x86/
 
+# Run the Python script
+python packet_gen_random.py
+
+clang -g -O2 memcpy_v6_1.c -o memcpy_v6_1

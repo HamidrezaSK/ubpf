@@ -67,7 +67,7 @@ done
 
 
 commands=(
-  "taskset 0x200 ./vec_instances/eBPF/encap/x86/memcpy_v6_1.o vec_instances/eBPF/encap/x86/ipv6_in_1.mem"
+  "taskset 0x200 ./vec_instances/eBPF/encap/x86/memcpy_v6_1 vec_instances/eBPF/encap/x86/ipv6_in_1.mem"
 )
 
 # Log file
