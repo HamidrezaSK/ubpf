@@ -21,6 +21,7 @@
 #include <ubpf_config.h>
 
 #define TRIAL_NUM 1000000
+#define HEAD_SPACE 200
 #define _GNU_SOURCE
 #include <linux/ipv6.h>
 #include <inttypes.h>
@@ -347,7 +348,7 @@ load:
         goto load;
     }
 
-    free(code);
+    free(code - HEAD_SPACE);
 
     if (rv < 0) {
         fprintf(stderr, "Failed to load code: %s\n", errmsg);
@@ -372,7 +373,7 @@ load:
         if (fn == NULL) {
             fprintf(stderr, "Failed to compile: %s\n", errmsg);
             free(errmsg);
-            free(mem);
+            free(mem - HEAD_SPACE);
             return 1;
         }
 
@@ -538,7 +539,7 @@ load:
     printf("0x%" PRIx64 "\n", ret);
 
     ubpf_destroy(vm);
-    free(mem);
+    free(mem - HEAD_SPACE);
     return 0;
 }
 
@@ -558,6 +559,7 @@ readfile(const char* path, size_t maxlen, size_t* len)
     }
 
     char* data = calloc(maxlen, 1);
+    data = data + HEAD_SPACE;
     size_t offset = 0;
     size_t rv;
     while ((rv = fread(data + offset, 1, maxlen - offset, file)) > 0) {
@@ -567,14 +569,14 @@ readfile(const char* path, size_t maxlen, size_t* len)
     if (ferror(file)) {
         fprintf(stderr, "Failed to read %s: %s\n", path, strerror(errno));
         fclose(file);
-        free(data);
+        free(data - HEAD_SPACE);
         return NULL;
     }
 
     if (!feof(file)) {
         fprintf(stderr, "Failed to read %s because it is too large (max %u bytes)\n", path, (unsigned)maxlen);
         fclose(file);
-        free(data);
+        free(data - HEAD_SPACE);
         return NULL;
     }
 
