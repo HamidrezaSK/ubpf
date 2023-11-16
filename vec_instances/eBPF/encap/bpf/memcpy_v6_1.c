@@ -15,7 +15,7 @@
 #include <string.h>
 #include <netinet/ether.h>
 
-#define NUM_PCKTS 4
+#define NUM_PCKTS 1
 
 #ifndef IPIP_V6_PREFIX1
 #define IPIP_V6_PREFIX1 1
@@ -109,6 +109,9 @@ struct real_definition dst = {
     .dstv6 = {2917007612, 16842442, 0, 33554432},
 };
 
+struct real_definition src = {
+    .dstv6 = {2917007612, 16842442, 0, 58744},
+};
 
 __attribute__((__always_inline__)) static inline void create_v6_hdr(
     struct ipv6hdr* ip6h,
@@ -118,8 +121,6 @@ __attribute__((__always_inline__)) static inline void create_v6_hdr(
     __u16 payload_len,
     __u8 proto) {
   ip6h->version = 6;
-  int i;
-  memset(ip6h->flow_lbl, 0, sizeof(ip6h->flow_lbl));
 
   ip6h->priority = DEFAULT_TOS;
 
@@ -132,49 +133,43 @@ __attribute__((__always_inline__)) static inline void create_v6_hdr(
 
 
 int xdp_load_balancer(void *xdp, size_t xdp_len){
-  void** packets = (void**)xdp;
-  void* data;
-  void* data_end;
-  struct ipv6hdr* ip6h;
-  struct ethhdr* new_eth;
-  struct ethhdr* old_eth;
-  __u16 payload_len;
-  __u32 ip_suffix;
-  __u32 saddr[4];
-  __u8 proto;
-  // ip(6)ip6 encap
-  int i,j;
-  #pragma unroll
-  for(i = 0; i < NUM_PCKTS; i++){ 
-    if (bpf_xdp_adjust_head(packets[i], 0 - (int)sizeof(struct ipv6hdr))) {
-      return false;
+  // void** packets = (void**)xdp;
+    void* data;
+    void* data_end;
+  	struct ipv6hdr* ip6h;
+  	struct ethhdr* new_eth;
+	int action = XDP_ABORTED;
+
+	__u16 payload_len;
+	__u8 proto;
+
+  	int i;
+  	#pragma unroll
+  	for(i = 0; i < NUM_PCKTS; i++){ 
+        data = xdp;
+        data_end = xdp + xdp_len/NUM_PCKTS;
+        new_eth = data;
+        ip6h = data + sizeof(struct ethhdr);
+        if (new_eth + 1 > data_end || ip6h + 1 > data_end) 
+        goto out;
+
+        memcpy(new_eth->h_dest, cval.mac, 6);
+
+        new_eth->h_proto = BE_ETH_P_IPV6;
+
+
+        proto = IPPROTO_IPV6;
+        payload_len = data_end - data;
+
+        create_v6_hdr(ip6h, pckt.tos,  src.dstv6, dst.dstv6, payload_len, proto);
+        }
+        if(ip6h->saddr.s6_addr32[0] == src.dstv6[0]){
+            action = XDP_PASS;
+            goto out;
     }
-    data = packets[i];
-    data_end = packets[i] + xdp_len/NUM_PCKTS;
-    new_eth = data;
-    ip6h = data + sizeof(struct ethhdr);
-    old_eth = data + sizeof(struct ipv6hdr);
-    if (new_eth + 1 > data_end || old_eth + 1 > data_end || ip6h + 1 > data_end) {
-      return false;
-    }
+	action = XDP_DROP;
 
-    memcpy(new_eth->h_dest, cval.mac, 6);
-    memcpy(new_eth->h_source, old_eth->h_dest, 6);
-
-    new_eth->h_proto = BE_ETH_P_IPV6;
-
-
-    proto = IPPROTO_IPV6;
-    ip_suffix = pckt.flow.srcv6[3] ^ pckt.flow.port16[0];
-    payload_len = xdp_len/NUM_PCKTS + sizeof(struct ipv6hdr);
-
-    saddr[0] = IPIP_V6_PREFIX1;
-    saddr[1] = IPIP_V6_PREFIX2;
-    saddr[2] = IPIP_V6_PREFIX3;
-    saddr[3] = ip_suffix;
-
-    create_v6_hdr(ip6h, pckt.tos, saddr, dst.dstv6, payload_len, proto);
-  }
-  return true;
+out:
+	return action;
 }
 

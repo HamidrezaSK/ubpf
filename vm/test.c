@@ -21,6 +21,7 @@
 #include <ubpf_config.h>
 
 #define TRIAL_NUM 1000000
+#define HEAD_SPACE 200
 #define _GNU_SOURCE
 #include <linux/ipv6.h>
 #include <inttypes.h>
@@ -205,7 +206,8 @@ main(int argc, char** argv)
         },
         {.name = "mem", .val = 'm', .has_arg = 1},
         {.name = "jit", .val = 'j'},
-        {.name = "vanila", .val = 'v'},
+        {.name = "compare", .val = 'v'},
+        {.name = "copy", .val = 'c'},
         {.name = "data", .val = 'd'},
         {.name = "register-offset", .val = 'r', .has_arg = 1},
         {.name = "unload", .val = 'U'}, /* for unit test only */
@@ -219,13 +221,15 @@ main(int argc, char** argv)
     bool unload = false;
     bool reload = false;
     bool data_relocation = false; // treat R_BPF_64_64 as relocations to maps by default.
-    bool my_jit = false; // use my jit
+    bool my_compare = false; // use my jit for compare
+    bool my_copy = false; // use my jit for memcpy
+
 
 
     uint64_t secret = (uint64_t)rand() << 32 | (uint64_t)rand();
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "hm:vjdr:URs:", longopts, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "hm:cvjdr:URs:", longopts, NULL)) != -1) {
         switch (opt) {
         case 'm':
             mem_filename = optarg;
@@ -251,8 +255,11 @@ main(int argc, char** argv)
         case 'R':
             reload = true;
             break;
-        case 'v':           // Modified JIT option (You need -j and -v to activate this)
-            my_jit = true;
+        case 'v':           // Modified JIT option for compare (You need -j and -v to activate this)
+            my_compare = true;
+            break;
+        case 'c':           // Modified JIT option for memcpy (You need -j and -c to activate this)
+            my_copy = true;
             break;
         default:
             usage(argv[0]);
@@ -267,6 +274,10 @@ main(int argc, char** argv)
 
     if (argc != optind + 1) {
         usage(argv[0]);
+        return 1;
+    }
+    if (my_copy && my_compare){ // For now our optimizations are isolated, not together
+        fprintf(stderr, "-c and -v can not be used together\n");
         return 1;
     }
 
@@ -337,7 +348,7 @@ load:
         goto load;
     }
 
-    free(code);
+    free(code - HEAD_SPACE);
 
     if (rv < 0) {
         fprintf(stderr, "Failed to load code: %s\n", errmsg);
@@ -352,15 +363,17 @@ load:
 
     if (jit) {
         ubpf_jit_fn fn;
-        if(!my_jit) 
-            fn = ubpf_compile(vm, &errmsg, 1);      // Vanila Compilation
+        if(my_compare) 
+            fn = ubpf_compile(vm, &errmsg, 1);      // Compare Optimization
+        else if(my_copy)
+            fn = ubpf_compile(vm, &errmsg, 2);      // Memcpy Optimization
         else
-            fn = ubpf_compile(vm, &errmsg, 0);      // Modified Compilation
+            fn = ubpf_compile(vm, &errmsg, 0);      // Vanila Compilation
 
         if (fn == NULL) {
             fprintf(stderr, "Failed to compile: %s\n", errmsg);
             free(errmsg);
-            free(mem);
+            free(mem - HEAD_SPACE);
             return 1;
         }
 
@@ -444,70 +457,89 @@ load:
 
 
     } else {
-        struct perf_event_attr pe[2];
-        int fd[2];
+        struct perf_event_attr pe;
+        int fd;
 
-    
-        // Configure Total instructions
-        memset(&pe[0], 0, sizeof(struct perf_event_attr));
-        pe[0].type = PERF_TYPE_HARDWARE;
-        pe[0].config = PERF_COUNT_HW_INSTRUCTIONS;
-        pe[0].size = sizeof(struct perf_event_attr);
-        pe[0].disabled = 1;
+        memset(&pe, 0, sizeof(struct perf_event_attr));
+        pe.type = PERF_TYPE_HARDWARE;
+        pe.config = PERF_COUNT_HW_INSTRUCTIONS;
+        pe.size = sizeof(struct perf_event_attr);
+        pe.disabled = 1;
 
-        // Configure Total cycles
-        memset(&pe[1], 0, sizeof(struct perf_event_attr));
-        pe[1].type = PERF_TYPE_HARDWARE;
-        pe[1].config = PERF_COUNT_HW_CPU_CYCLES;
-        pe[1].size = sizeof(struct perf_event_attr);
-        pe[1].disabled = 1;
-
-        // Create counters
-        for (int i = 0; i < 2; i++) {
-            fd[i] = perf_event_open(&pe[i], 0, -1, -1, 0);
-            if (fd[i] == -1) {
-                perror("Error opening the event");
-                exit(EXIT_FAILURE);
-            }
-        }
-        // Start counters
-        for (int i = 0; i < 2; i++) {
-            ioctl(fd[i], PERF_EVENT_IOC_RESET, 0);
-            ioctl(fd[i], PERF_EVENT_IOC_ENABLE, 0);
+        fd = perf_event_open(&pe, 0, -1, -1, 0);
+        if (fd == -1) {
+            perror("Error opening the event");
+            exit(EXIT_FAILURE);
         }
 
-        for(i = 0; i < TRIAL_NUM ; ++i)
+        // Start the counter
+        ioctl(fd, PERF_EVENT_IOC_RESET, 0);
+        ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
+
+
+        for(i = 0; i < TRIAL_NUM ; ++i){
             ubpf_exec(vm, mem, mem_len, &ret);
-
-        for (int i = 0; i < 2; i++) {
-            ioctl(fd[i], PERF_EVENT_IOC_DISABLE, 0);
         }
 
-        // Read and print results
-        long long count[2];
-        for (int i = 0; i < 2; i++) {
-            if(read(fd[i], &count[i], sizeof(long long)) == -1)
-            {
-                perror("Error reading results");
-                exit(EXIT_FAILURE);
-            }
+        // Disable the counter
+        ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
+
+        // Read and return the count
+        long long count;
+        if (read(fd, &count, sizeof(long long)) == -1) {
+            perror("Error reading results");
+            exit(EXIT_FAILURE);
         }
 
+        close(fd);
+        printf("Total instructions: %lld\n", count);
 
-        printf("Total cycles: %lld\n", count[0]);
-        printf("Total instructions: %lld\n", count[1]);
+        memset(&pe, 0, sizeof(struct perf_event_attr));
+        pe.type = PERF_TYPE_HARDWARE;
+        pe.config = PERF_COUNT_HW_CPU_CYCLES;
+        pe.size = sizeof(struct perf_event_attr);
+        pe.disabled = 1;
 
-        // Close counters
-        for (int i = 0; i < 2; i++) {
-            close(fd[i]);
+        fd = perf_event_open(&pe, 0, -1, -1, 0);
+        if (fd == -1) {
+            perror("Error opening the event");
+            exit(EXIT_FAILURE);
         }
+
+        ioctl(fd, PERF_EVENT_IOC_RESET, 0);
+        ioctl(fd, PERF_EVENT_IOC_ENABLE, 0);
+
+        for(i = 0; i < TRIAL_NUM ; ++i){
+            ubpf_exec(vm, mem, mem_len, &ret);
+        }
+
+        ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
+
+        // Read and return the count
+        if (read(fd, &count, sizeof(long long)) == -1) {
+            perror("Error reading results");
+            exit(EXIT_FAILURE);
+        }
+
+        close(fd);
+
+        printf("Total cycles: %lld\n", count);
+
+        clock_t begin = clock();
+        for(i = 0; i < TRIAL_NUM ; ++i){
+            ubpf_exec(vm, mem, mem_len, &ret);
+        }
+
+        double time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
+
+        printf("Average execution time: %.7f\n", time_spent);
 
     }
 
     printf("0x%" PRIx64 "\n", ret);
 
     ubpf_destroy(vm);
-    free(mem);
+    free(mem - HEAD_SPACE);
     return 0;
 }
 
@@ -527,6 +559,7 @@ readfile(const char* path, size_t maxlen, size_t* len)
     }
 
     char* data = calloc(maxlen, 1);
+    data = data + HEAD_SPACE;
     size_t offset = 0;
     size_t rv;
     while ((rv = fread(data + offset, 1, maxlen - offset, file)) > 0) {
@@ -536,14 +569,14 @@ readfile(const char* path, size_t maxlen, size_t* len)
     if (ferror(file)) {
         fprintf(stderr, "Failed to read %s: %s\n", path, strerror(errno));
         fclose(file);
-        free(data);
+        free(data - HEAD_SPACE);
         return NULL;
     }
 
     if (!feof(file)) {
         fprintf(stderr, "Failed to read %s because it is too large (max %u bytes)\n", path, (unsigned)maxlen);
         fclose(file);
-        free(data);
+        free(data - HEAD_SPACE);
         return NULL;
     }
 

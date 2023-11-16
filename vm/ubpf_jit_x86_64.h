@@ -93,6 +93,16 @@ struct jump
     uint32_t target_offset;
 };
 
+struct vec_memcpy
+{
+    int save_reg;
+    int load_reg;
+    int save_addr;
+    int load_addr;
+    uint32_t start_offset;
+    uint32_t end_offset;
+};
+
 /* Special values for target_pc in struct jump */
 #define TARGET_PC_EXIT -1
 #define TARGET_PC_RETPOLINE -3

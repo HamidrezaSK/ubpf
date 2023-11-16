@@ -118,5 +118,10 @@ dmypy.json
 
 .vscode/
 .vs/
+html/
 
 *.mem
+
+
+# opt.viewer files
+*.opt.yaml
