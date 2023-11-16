@@ -53,6 +53,15 @@ if __name__ == "__main__":
     inst = np.array([mean(vanila_inst), mean(modified_inst), mean(x86_inst), mean(aot_inst)])
     times = np.array([mean(vanila_times), mean(modified_times), mean(x86_times), mean(aot_times)])
 
+    print("times:")
+    print(times)
+    print("cycles:")
+    print(cycles)
+    print("inst:")
+    print(inst)
+    print("IPC:")
+    print(inst/cycles)
+
     #plot
 
     # Data labels and positions
@@ -61,30 +70,34 @@ if __name__ == "__main__":
     width = 0.2  # Width of the bars
 
     # Define different colors for the bars
-    colors = ['#0080FF', '#FF007F', '#00CC66', '#CC00CC']
+    # colors = ['#0080FF', '#FF007F', '#00CC66', '#CC00CC']
+    colors = ["tab:blue","tab:orange","tab:green","tab:red"]
 
     fig, axs = plt.subplots(1, 3, figsize=(12, 4))
 
     # Subplot 1: Cycles
-    axs[0].bar(x, cycles, width, color=colors)
+    axs[0].bar(x, cycles, width, color=colors,zorder=2)
     axs[0].set_xticks(x)
     axs[0].set_xticklabels(labels)
+    axs[0].grid(axis='y')
     axs[0].set_title('Cycles')
     axs[0].legend()
 
     # # Subplot 2: Instructions
-    axs[1].bar(x, inst, width, color=colors)
+    axs[1].bar(x, inst, width, color=colors,zorder=2)
     axs[1].set_xticks(x)
     axs[1].set_xticklabels(labels)
     axs[1].set_title('Instructions')
+    axs[1].grid(axis='y')
     axs[1].legend()
 
 
     # # Subplot 3: Times
-    axs[2].bar(x, times, width, color=colors)
+    axs[2].bar(x, times, width, color=colors,zorder=2)
     axs[2].set_xticks(x)
     axs[2].set_xticklabels(labels)
     axs[2].set_title('Times')
+    axs[2].grid(axis='y')
     axs[2].legend()
 
     plt.tight_layout()
@@ -98,30 +111,35 @@ if __name__ == "__main__":
     width = 0.2  # Width of the bars
 
     # Define different colors for the bars
-    colors = ['#0080FF', '#FF007F', '#00CC66']
+    # colors = ['#0080FF', '#FF007F', '#00CC66']
+    colors = ["tab:blue","tab:orange","tab:green"]
+
 
     fig, axs = plt.subplots(1, 3, figsize=(12, 4))
 
     # Subplot 1: Cycles
-    axs[0].bar(x, cycles[:3], width, color=colors)
+    axs[0].bar(x, cycles[:3], width, color=colors,zorder=2)
     axs[0].set_xticks(x)
     axs[0].set_xticklabels(labels)
     axs[0].set_title('Cycles')
+    axs[0].grid(axis='y')
     axs[0].legend()
 
     # # Subplot 2: Instructions
-    axs[1].bar(x, inst[:3], width, color=colors)
+    axs[1].bar(x, inst[:3], width, color=colors,zorder=2)
     axs[1].set_xticks(x)
     axs[1].set_xticklabels(labels)
     axs[1].set_title('Instructions')
+    axs[1].grid(axis='y')
     axs[1].legend()
 
 
     # # Subplot 3: Times
-    axs[2].bar(x, times[:3], width, color=colors)
+    axs[2].bar(x, times[:3], width, color=colors,zorder=2)
     axs[2].set_xticks(x)
     axs[2].set_xticklabels(labels)
     axs[2].set_title('Times')
+    axs[2].grid(axis='y')
     axs[2].legend()
 
     plt.tight_layout()
@@ -132,30 +150,36 @@ if __name__ == "__main__":
     width = 0.2  # Width of the bars
 
     # Define different colors for the bars
-    colors = ['#0080FF', '#FF007F', '#00CC66']
+    # colors = ['#0080FF', '#FF007F', '#00CC66']
+    colors = ["tab:blue","tab:orange","tab:green"]
+
+
 
     fig, axs = plt.subplots(1, 4, figsize=(12, 4))
 
     # Subplot 1: Cycles
-    axs[0].bar(x, cycles[:3]/cycles[2], width, color=colors)
+    axs[0].bar(x, cycles[:3]/cycles[0], width, color=colors,zorder=2)
     axs[0].set_xticks(x)
     axs[0].set_xticklabels(labels)
     axs[0].set_title('Cycles Normalised')
+    axs[0].grid(axis='y')
     axs[0].legend()
 
     # # Subplot 2: Instructions
-    axs[1].bar(x, inst[:3]/inst[2], width, color=colors)
+    axs[1].bar(x, inst[:3]/inst[0], width, color=colors,zorder=2)
     axs[1].set_xticks(x)
     axs[1].set_xticklabels(labels)
     axs[1].set_title('Instructions Normalised')
+    axs[1].grid(axis='y')
     axs[1].legend()
 
 
     # # Subplot 3: Times
-    axs[2].bar(x, times[:3]/times[2], width, color=colors)
+    axs[2].bar(x, times[:3]/times[0], width, color=colors,zorder=2)
     axs[2].set_xticks(x)
     axs[2].set_xticklabels(labels)
     axs[2].set_title('Times Normalised')
+    axs[2].grid(axis='y')
     axs[2].legend()
 
     # # Subplot 3: Times
@@ -164,11 +188,15 @@ if __name__ == "__main__":
     labels = ['Vanila', 'Modified', 'x86', 'AOT']
     x = np.arange(len(labels))
     # Define different colors for the bars
-    colors = ['#0080FF', '#FF007F', '#00CC66', '#CC00CC']
-    axs[3].bar(x, inst/cycles, width, color=colors)
+    # colors = ['#0080FF', '#FF007F', '#00CC66', '#CC00CC']
+    colors = ["tab:blue","tab:orange","tab:green","tab:red"]
+
+
+    axs[3].bar(x, inst/cycles, width, color=colors,zorder=2)
     axs[3].set_xticks(x)
     axs[3].set_xticklabels(labels)
     axs[3].set_title('IPC')
+    axs[3].grid(axis='y')
     axs[3].legend()
 
     plt.tight_layout()
