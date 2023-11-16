@@ -118,6 +118,7 @@ dmypy.json
 
 .vscode/
 .vs/
+html/
 
 *.mem
 
