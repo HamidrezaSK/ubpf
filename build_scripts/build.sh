@@ -66,3 +66,13 @@ cd vec_instances/eBPF/encap/x86/
 python packet_gen_random.py
 
 clang -g -O2 memcpy_v6_1.c -o memcpy_v6_1
+
+cd -
+
+cd vec_instances/eBPF/katran/ 
+
+make clean
+
+make all
+
+cd -
