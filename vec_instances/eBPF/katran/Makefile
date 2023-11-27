@@ -6,8 +6,7 @@ DEBUGBPF = -DDEBUG
 DEBUGFLAGS = -O0 -g -Wall
 PFLAGS = $(DEBUGFLAGS)
 
-INCLUDEFLAGS = -I/usr/include \
-	       -I$(obj)/lib/linux_includes \
+INCLUDEFLAGS = -I$(obj)/lib/linux_includes \
 	       -I..
 
 
