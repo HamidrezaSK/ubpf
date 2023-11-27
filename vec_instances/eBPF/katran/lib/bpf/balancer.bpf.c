@@ -21,16 +21,8 @@
 #include "katran/lib/bpf/handle_icmp.h"
 #include "katran/lib/bpf/pckt_encap.h"
 #include "katran/lib/bpf/pckt_parsing.h"
-struct __xdp_md {
-	void* data;
-	void* data_end;
-	// __u32 data_meta;
-	// /* Below access go through struct xdp_rxq_info */
-	// __u32 ingress_ifindex; /* rxq->dev->ifindex */
-	// __u32 rx_queue_index;  /* rxq->queue_index  */
 
-	// __u32 egress_ifindex;  /* txq->dev->ifindex */
-};
+
 
 struct test_map_struct{
   __uint(type, BPF_MAP_TYPE_HASH);
@@ -40,7 +32,7 @@ struct test_map_struct{
   __uint(map_flags, NO_FLAGS);
 };
 
-static int (*print)(const char,__u64) = (void*)9;
+// static int (*print)(const char,__u64) = (void*)9;
 
 __attribute__((__always_inline__)) static inline __u32 get_packet_hash(
     struct packet_description* pckt,
@@ -255,7 +247,7 @@ __attribute__((__always_inline__)) static inline int process_l3_headers(
         return action;
       }
     } else {
-      print('k',0);
+      // print('k',0);
       memcpy(pckt->flow.srcv6, ip6h->saddr.s6_addr32, 16);
       memcpy(pckt->flow.dstv6, ip6h->daddr.s6_addr32, 16);
     }
@@ -665,12 +657,18 @@ __attribute__((__always_inline__)) static inline int
 process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_struct* my_vip_map) {
   void* data = (void*)(long)xdp->data;
   void* data_end = (void*)(long)xdp->data_end;
-  struct ctl_value* cval;
-  struct real_definition* dst = NULL;
+
+  struct ctl_value my_cval = {.mac = {'a','b','c','d','e','f'}};
+  struct ctl_value* cval = &my_cval;
+  struct real_definition my_dst = {.dst = 0, .dstv6 = {2917007612, 16842442, 0, 33554432}, .flags = 3};
+  struct real_definition* dst = &my_dst;
   struct packet_description pckt = {};
   struct vip_definition vip = {};
-  struct vip_meta* vip_info;
-  struct lb_stats* data_stats;
+  struct vip_meta my_vip_info = {.flags=6,.vip_num=1};
+  struct vip_meta* vip_info = &my_vip_info;
+
+  struct lb_stats my_data_stats = {.v1=0, .v2=0};
+  struct lb_stats* data_stats = &my_data_stats;
   __u64 iph_len;
   __u8 protocol;
   __u16 original_sport;
@@ -680,7 +678,7 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
   __u32 mac_addr_pos = 0;
   __u16 pkt_bytes;
   action = process_l3_headers(
-      &pckt, &protocol, off, &pkt_bytes, data, data_end, is_ipv6);
+      &pckt, &protocol, off, &pkt_bytes, data, data_end, is_ipv6, my_vip_map);
   if (action >= 0) {
     return action;
   }
@@ -732,7 +730,6 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
 #endif // INLINE_DECAP_IPIP
 
   if (protocol == IPPROTO_TCP) {
-    print('k',1);
     if (!parse_tcp(data, data_end, is_ipv6, &pckt)) {
       return XDP_DROP;
     }
@@ -765,12 +762,11 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
 
   vip.port = pckt.flow.port16[1];
   vip.proto = pckt.flow.proto;
-  vip_info = bpf_map_lookup_elem(&my_vip_map, &vip);
-  print('k',2);
+  // vip_info = bpf_map_lookup_elem(&my_vip_map, &vip);
 
   if (!vip_info) {
     vip.port = 0;
-    vip_info = bpf_map_lookup_elem(&my_vip_map, &vip);
+    // vip_info = bpf_map_lookup_elem(&my_vip_map, &vip);
     if (!vip_info) {
       return XDP_PASS;
     }
@@ -802,7 +798,7 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
   }
 
   __u32 stats_key = MAX_VIPS + LRU_CNTRS;
-  data_stats = bpf_map_lookup_elem(&stats, &stats_key);
+  // data_stats = bpf_map_lookup_elem(&stats, &stats_key);
   if (!data_stats) {
     return XDP_DROP;
   }
@@ -817,20 +813,22 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
   }
 
   vip_num = vip_info->vip_num;
-  __u32 cpu_num = bpf_get_smp_processor_id();
-  void* lru_map = bpf_map_lookup_elem(&lru_mapping, &cpu_num);
-  if (!lru_map) {
-    lru_map = &fallback_cache;
-    __u32 lru_stats_key = MAX_VIPS + FALLBACK_LRU_CNTR;
-    struct lb_stats* lru_stats = bpf_map_lookup_elem(&stats, &lru_stats_key);
-    if (!lru_stats) {
-      return XDP_DROP;
-    }
-    // We were not able to retrieve per cpu/core lru and falling back to
-    // default one. This counter should never be anything except 0 in prod.
-    // We are going to use it for monitoring.
-    lru_stats->v1 += 1;
-  }
+  // __u32 cpu_num = bpf_get_smp_processor_id();
+  __u32 cpu_num = 0;
+  void* lru_map;
+  // void* lru_map = bpf_map_lookup_elem(&lru_mapping, &cpu_num);
+  // if (!lru_map) {
+  //   lru_map = &fallback_cache;
+  //   __u32 lru_stats_key = MAX_VIPS + FALLBACK_LRU_CNTR;
+  //   struct lb_stats* lru_stats = bpf_map_lookup_elem(&stats, &lru_stats_key);
+  //   if (!lru_stats) {
+  //     return XDP_DROP;
+  //   }
+  //   // We were not able to retrieve per cpu/core lru and falling back to
+  //   // default one. This counter should never be anything except 0 in prod.
+  //   // We are going to use it for monitoring.
+  //   lru_stats->v1 += 1;
+  // }
 
   // Lookup dst based on id in packet
   if ((vip_info->flags & F_QUIC_VIP)) {
@@ -843,7 +841,7 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
       // server generated connection id which can be used for routing.
       // fallback to CH to route quic icmp messages.
       __u32 stats_key = MAX_VIPS + QUIC_ICMP_STATS;
-      struct lb_stats* data_stats = bpf_map_lookup_elem(&stats, &stats_key);
+      // struct lb_stats* data_stats = bpf_map_lookup_elem(&stats, &stats_key);
       if (!data_stats) {
         return XDP_DROP;
       }
@@ -854,8 +852,10 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
       }
     } else {
       __u32 quic_packets_stats_key = 0;
+      struct lb_quic_packets_stats my_quic_packets_stats = {};
+
       struct lb_quic_packets_stats* quic_packets_stats =
-          bpf_map_lookup_elem(&quic_stats_map, &quic_packets_stats_key);
+          &my_quic_packets_stats;
       if (!quic_packets_stats) {
         return XDP_DROP;
       }
@@ -863,9 +863,10 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
       if (qpr.server_id > 0) {
         // server_id is expected to always be positive. get a server id from
         // quic packet
-        increment_quic_cid_version_stats(quic_packets_stats, qpr.cid_version);
+        // increment_quic_cid_version_stats(quic_packets_stats, qpr.cid_version);
         __u32 key = qpr.server_id;
-        __u32* real_pos = bpf_map_lookup_elem(&server_id_map, &key);
+        // __u32* real_pos = bpf_map_lookup_elem(&server_id_map, &key);
+        __u32* real_pos;
         if (real_pos) {
           // get a real position for the server id
           key = *real_pos;
@@ -922,8 +923,8 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
   // save the original sport before making real selection, possibly changing its
   // value.
   original_sport = pckt.flow.port16[0];
-
   if (!dst) {
+
 #ifdef TCP_SERVER_ID_ROUTING
     // First try to lookup dst in the tcp_hdr_opt (if enabled)
     if (pckt.flow.proto == IPPROTO_TCP) {
@@ -960,10 +961,10 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
 #endif // TCP_SERVER_ID_ROUTING
 
     // Next, try to lookup dst in the lru_cache
-    if (!dst && !(pckt.flags & F_SYN_SET) &&
-        !(vip_info->flags & F_LRU_BYPASS)) {
-      connection_table_lookup(&dst, &pckt, lru_map, /*isGlobalLru=*/false);
-    }
+    // if (!dst && !(pckt.flags & F_SYN_SET) &&
+    //     !(vip_info->flags & F_LRU_BYPASS)) {
+    //   connection_table_lookup(&dst, &pckt, lru_map, /*isGlobalLru=*/false);
+    // }
 
 #ifdef GLOBAL_LRU_LOOKUP
     if (!dst && !(pckt.flags & F_SYN_SET) && vip_info->flags & F_GLOBAL_LRU) {
@@ -978,21 +979,22 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
     // if dst is not found, route via consistent-hashing of the flow.
     if (!dst) {
       if (pckt.flow.proto == IPPROTO_TCP) {
-        __u32 lru_stats_key = MAX_VIPS + LRU_MISS_CNTR;
-        struct lb_stats* lru_stats =
-            bpf_map_lookup_elem(&stats, &lru_stats_key);
-        if (!lru_stats) {
-          return XDP_DROP;
-        }
+        // __u32 lru_stats_key = MAX_VIPS + LRU_MISS_CNTR;
+        // struct lb_stats* lru_stats =
+        //     bpf_map_lookup_elem(&stats, &lru_stats_key);
+        // if (!lru_stats) {
+        //   return XDP_DROP;
+        // }
         if (pckt.flags & F_SYN_SET) {
           // miss because of new tcp session
-          lru_stats->v1 += 1;
+          // lru_stats->v1 += 1;
+          data_stats->v1 += 1;
         } else {
           // miss of non-syn tcp packet. could be either because of LRU
           // trashing or because another katran is restarting and all the
           // sessions have been reshuffled
           REPORT_TCP_NONSYN_LRUMISS(xdp, data, data_end - data, false);
-          lru_stats->v2 += 1;
+          data_stats->v2 += 1;
         }
       }
       if (!get_packet_dst(&dst, &pckt, vip_info, is_ipv6, lru_map)) {
@@ -1009,24 +1011,29 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
     }
   }
 
-  cval = bpf_map_lookup_elem(&ctl_array, &mac_addr_pos);
+  // cval = bpf_map_lookup_elem(&ctl_array, &mac_addr_pos);
+  // print('r',0);
 
   if (!cval) {
     return XDP_DROP;
   }
+  // print('r',1);
 
-  data_stats = bpf_map_lookup_elem(&stats, &vip_num);
+  // data_stats = bpf_map_lookup_elem(&stats, &vip_num);
   if (!data_stats) {
     return XDP_DROP;
   }
   data_stats->v1 += 1;
   data_stats->v2 += pkt_bytes;
+  // print('r',2);
 
   // per real statistics
-  data_stats = bpf_map_lookup_elem(&reals_stats, &pckt.real_index);
+  // data_stats = bpf_map_lookup_elem(&reals_stats, &pckt.real_index);
   if (!data_stats) {
     return XDP_DROP;
   }
+  // print('r',3);
+
   data_stats->v1 += 1;
   data_stats->v2 += pkt_bytes;
 #ifdef LOCAL_DELIVERY_OPTIMIZATION
@@ -1037,6 +1044,7 @@ process_packet(struct __xdp_md* xdp, __u64 off, bool is_ipv6, struct test_map_st
   // restore the original sport value to use it as a seed for the GUE sport
   pckt.flow.port16[0] = original_sport;
   if (dst->flags & F_IPV6) {
+  // print('r',4);
     if (!PCKT_ENCAP_V6(xdp, cval, is_ipv6, &pckt, dst, pkt_bytes)) {
       return XDP_DROP;
     }
@@ -1077,9 +1085,8 @@ int balancer_ingress(struct __xdp_md* ctx, struct test_map_struct* my_vip_map) {
 int xdp_load_balancer(void *xdp, size_t xdp_len){
   // void** packets = (void**)xdp;
   struct __xdp_md ctx = {.data = xdp, .data_end = xdp + xdp_len};
-  print('k',0);
   struct test_map_struct my_vip_map;
-  int action = balancer_ingress(&ctx,&test_map_struct);
+  int action = balancer_ingress(&ctx,&my_vip_map);
 	return action;
 }
 
