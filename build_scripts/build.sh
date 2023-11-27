@@ -76,3 +76,9 @@ make clean
 make all
 
 cd -
+
+cd vec_instances/eBPF/katran/lib/bpf/
+
+python packet_gen_random.py
+
+cd -
