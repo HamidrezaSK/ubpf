@@ -376,8 +376,7 @@ load:
             free(mem - HEAD_SPACE);
             return 1;
         }
-
-        // clock_t begin = clock();
+        
         struct perf_event_attr pe;
         int fd;
 
@@ -447,9 +446,8 @@ load:
         printf("Total cycles: %lld\n", count);
 
         clock_t begin = clock();
-        for(i = 0; i < TRIAL_NUM ; ++i){
+        for(i = 0; i < TRIAL_NUM ; ++i)
             ret = fn(mem, mem_len);
-        }
 
         double time_spent = (double)(clock() - begin) / CLOCKS_PER_SEC;
 
@@ -710,18 +708,30 @@ bpf_map_delete_elem_impl(struct bpf_map* map, const void* key)
         exit(1);
     }
 }
+static int
+print_impl(const char message,__u64 n)
+{
+    printf("%c %lld\n",message,n);
+    return n; 
+}
+static int
+print_2_impl(const char message,__u64 n)
+{
+    printf("%c %lld\n",message,n);
+    return n; 
+}
 
 static int
 bpf_xdp_adjust_head_impl(void* xdp_md, int delta)
 {
     unsigned char *new_xdp_md = (unsigned char *)xdp_md + delta;
-
-    if(delta > sizeof(struct ipv6hdr))
-        return -1;
+    if(delta*(-1) > HEAD_SPACE)
+        return 1;
 
     xdp_md = new_xdp_md;
     return 0; 
 }
+
 
 static void
 register_functions(struct ubpf_vm* vm)
@@ -737,5 +747,7 @@ register_functions(struct ubpf_vm* vm)
     ubpf_register(vm, (unsigned int)(uintptr_t)bpf_map_update_elem, "bpf_map_update_elem", bpf_map_update_elem_impl);
     ubpf_register(vm, (unsigned int)(uintptr_t)bpf_map_delete_elem, "bpf_map_delete_elem", bpf_map_delete_elem_impl);
     ubpf_register(vm, (int)(uintptr_t)bpf_xdp_adjust_head, "bpf_xdp_adjust_head", bpf_xdp_adjust_head_impl);
+    ubpf_register(vm, 9, "print", print_impl);
+    ubpf_register(vm, 10, "print_2", print_2_impl);
 
 }
