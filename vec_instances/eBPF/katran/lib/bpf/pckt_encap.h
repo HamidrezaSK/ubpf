@@ -39,8 +39,11 @@
 #include "katran/lib/bpf/flow_debug.h"
 #include "katran/lib/bpf/pckt_parsing.h"
 
+// static int (*print_2)(const char,__u64) = (void*)10;
+
+
 __attribute__((__always_inline__)) static inline bool encap_v6(
-    struct xdp_md* xdp,
+    struct __xdp_md* xdp,
     struct ctl_value* cval,
     bool is_ipv6,
     struct packet_description* pckt,
@@ -53,22 +56,29 @@ __attribute__((__always_inline__)) static inline bool encap_v6(
   struct ethhdr* old_eth;
   __u16 payload_len;
   __u32 ip_suffix;
-  __u32 saddr[4];
+  __u32 saddr[4] = {2917007612, 16842442, 0, 58744};
   __u8 proto;
   // ip(6)ip6 encap
+
   if (bpf_xdp_adjust_head(xdp, 0 - (int)sizeof(struct ipv6hdr))) {
     return false;
   }
+
   data = (void*)(long)xdp->data;
   data_end = (void*)(long)xdp->data_end;
   new_eth = data;
   ip6h = data + sizeof(struct ethhdr);
   old_eth = data + sizeof(struct ipv6hdr);
-  if (new_eth + 1 > data_end || old_eth + 1 > data_end || ip6h + 1 > data_end) {
-    return false;
-  }
+  // print_2('e',0);
+
+  // if (new_eth + 1 > data_end || old_eth + 1 > data_end || ip6h + 1 > data_end) {
+  //   return false;
+  // }
+
   memcpy(new_eth->h_dest, cval->mac, 6);
   memcpy(new_eth->h_source, old_eth->h_dest, 6);
+  // print_2('e',1);
+
   new_eth->h_proto = BE_ETH_P_IPV6;
 
   if (is_ipv6) {
@@ -81,11 +91,10 @@ __attribute__((__always_inline__)) static inline bool encap_v6(
     payload_len = pkt_bytes;
   }
 
-  saddr[0] = IPIP_V6_PREFIX1;
-  saddr[1] = IPIP_V6_PREFIX2;
-  saddr[2] = IPIP_V6_PREFIX3;
-  saddr[3] = ip_suffix;
-
+  // saddr[0] = IPIP_V6_PREFIX1;
+  // saddr[1] = IPIP_V6_PREFIX2;
+  // saddr[2] = IPIP_V6_PREFIX3;
+  // saddr[3] = ip_suffix;
   create_v6_hdr(ip6h, pckt->tos, saddr, dst->dstv6, payload_len, proto);
 
   return true;
