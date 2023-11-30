@@ -122,6 +122,27 @@ You'll need [Clang 3.7](http://llvm.org/releases/download.html#3.7.0).
 You can then pass the contents of `prog.o` to `ubpf_load_elf`, or to the stdin of
 the `vm/test` binary.
 
+## Scripts
+To build the whole project and dependecies go to build_scripts directory and run:
+
+```console
+sudo ./build.sh
+```
+This script will build the project and all the use cases inside vec_instances.
+
+To run the Vectorized Comparison usecase go to build_scripts directory and run:
+```console
+sudo ./run.sh
+```
+To run the Vectorized Memcpy usecase go to build_scripts directory and run:
+```console
+sudo ./run_copy.sh
+```
+To run the Vectorized Katran usecase go to build_scripts directory and run:
+```console
+sudo ./run_kat.sh
+```
+
 ## Vectorized Comparison
 
 To use the modified JIT compilation you neet to add option -v to your uBPF test
@@ -160,6 +181,38 @@ We observe repeated patterns like the following:
       70:	1d 78 b7 00 00 00 00 00	if r8 == r7 goto +183 <LBB0_81>
 ```
 Our goal is to identify these patterns and replace them with SIMD operations.
+
+## Vectorized Memory Copy
+
+To use the modified JIT compilation for memory copy you neet to add option -c to your uBPF test
+
+```console
+build/bin/ubpf_test vec_instances/eBPF/encap/bpf/memcpy_v6_1.o -c -d -j -m vec_instances/eBPF/encap/bpf/ipv6_in.mem
+```
+
+Inside the ipv6_in.mem file is a IP packet which is created with scapy, the script to creat such packet is here
+
+```console
+/PATHTOYOURREP/vec_instances/eBPF/encap/bpf/packet_gen_random.py
+```
+
+The use cases can be found within the "vec_instances/eBPF/" folder. These applications have undergone prior validation by the eBPF verifier to ensure their legitimacy as eBPF applications
+
+We aim to optimize code at the assembly level. We observe repeated patterns like the following:
+```assembly
+      38:	61 23 0c 00 00 00 00 00	r3 = *(u32 *)(r2 + 0xc)
+      39:	63 31 22 00 00 00 00 00	*(u32 *)(r1 + 0x22) = r3
+      40:	61 23 08 00 00 00 00 00	r3 = *(u32 *)(r2 + 0x8)
+      41:	63 31 1e 00 00 00 00 00	*(u32 *)(r1 + 0x1e) = r3
+      42:	61 23 04 00 00 00 00 00	r3 = *(u32 *)(r2 + 0x4)
+      43:	63 31 1a 00 00 00 00 00	*(u32 *)(r1 + 0x1a) = r3
+      44:	61 23 00 00 00 00 00 00	r3 = *(u32 *)(r2 + 0x0)
+      45:	63 31 16 00 00 00 00 00	*(u32 *)(r1 + 0x16) = r3
+```
+Our goal is to identify these patterns and replace them with SIMD operations.
+
+## Other Usecases
+We also tested other use cases using our optimization passes, such as Katran. They are located within "vec_instances/eBPF/" folder.
 
 ## License
 
