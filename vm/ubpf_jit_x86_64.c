@@ -1988,11 +1988,11 @@ static int
 analyse_memcpy_64(struct ubpf_vm* vm, struct vec_memcpy* vec_memcpy, int *num_cpy)
 {
     int i;
-    printf("alo\n");
+    // printf("alo\n");
     // int count = 0;
 
     bool load_started = false;
-    int started_offset = -1;
+    // int started_offset = -1;
     int load_counter = 0;
     int save_counter = 0;
 
@@ -2010,9 +2010,9 @@ analyse_memcpy_64(struct ubpf_vm* vm, struct vec_memcpy* vec_memcpy, int *num_cp
         case EBPF_OP_LDXW:
             if(!load_started)
             {
-                printf("we found a potential packed memcpy start at: %d, src: %d, dst: %d, imm: %d \n",i,src,dst,inst.offset);
+                // printf("we found a potential packed memcpy start at: %d, src: %d, dst: %d, imm: %d \n",i,src,dst,inst.offset);
                 load_started = true;
-                started_offset = i;
+                // started_offset = i;
                 load_counter = 1;
                 load_reg = src;
                 min_imm_ld = inst.offset;
@@ -2023,7 +2023,7 @@ analyse_memcpy_64(struct ubpf_vm* vm, struct vec_memcpy* vec_memcpy, int *num_cp
             }
             else if(load_counter < 4 && load_counter >= save_counter && src == load_reg)
             {
-                printf("This is a load at %d part of the copy started at %d,src: %d, dst: %d, imm: %d \n",i,started_offset,src,dst,inst.offset);
+                // printf("This is a load at %d part of the copy started at %d,src: %d, dst: %d, imm: %d \n",i,started_offset,src,dst,inst.offset);
                 load_counter ++;
                 if(inst.offset < min_imm_ld)
                     min_imm_ld = inst.offset;
@@ -2034,7 +2034,7 @@ analyse_memcpy_64(struct ubpf_vm* vm, struct vec_memcpy* vec_memcpy, int *num_cp
             // printf("conditions: loadstarted: %d, save_counter %d, load_counter  %d",load_started,save_counter, load_counter +1);
             if(load_started && save_counter + 2 == load_counter)
             {
-                printf("This is a save at %d part of the copy started at %d,src: %d, dst: %d, imm: %d \n",i,started_offset,src,dst,inst.offset);
+                // printf("This is a save at %d part of the copy started at %d,src: %d, dst: %d, imm: %d \n",i,started_offset,src,dst,inst.offset);
                 // printf("the save address is: %d\n",inst.offset);
                 save_counter+=2;
                 save_reg = dst;
@@ -2056,7 +2056,7 @@ analyse_memcpy_64(struct ubpf_vm* vm, struct vec_memcpy* vec_memcpy, int *num_cp
                 min_imm_sv = INT_MAX;
                 min_imm_ld = INT_MAX;
 
-                printf("Copy %d was completed, starting imm for load: %d, starting imm for save: %d, load address is in: %d, save address is in: %d\n",copy_counter,min_imm_ld,min_imm_sv,load_reg,save_reg);
+                // printf("Copy %d was completed, starting imm for load: %d, starting imm for save: %d, load address is in: %d, save address is in: %d\n",copy_counter,min_imm_ld,min_imm_sv,load_reg,save_reg);
                 copy_counter ++;
             }
             break;
@@ -2072,11 +2072,11 @@ analyse_memcpy_64(struct ubpf_vm* vm, struct vec_memcpy* vec_memcpy, int *num_cp
     }
     qsort (vec_memcpy, copy_counter, sizeof(*vec_memcpy), comp_cpy);      // Sorting the lables
 
-    for (i = 0; i< copy_counter; i++)
-    {
-        printf("vec copy start at %d, ends at %d, load address in %d reg with offset %d save address in %d reg with offset %d \n",
-                                                    vec_memcpy[i].start_offset,vec_memcpy[i].end_offset,vec_memcpy[i].load_reg,vec_memcpy[i].load_addr,vec_memcpy[i].save_reg,vec_memcpy[i].save_addr);
-    }
+    // for (i = 0; i< copy_counter; i++)
+    // {
+    //     printf("vec copy start at %d, ends at %d, load address in %d reg with offset %d save address in %d reg with offset %d \n",
+    //                                                 vec_memcpy[i].start_offset,vec_memcpy[i].end_offset,vec_memcpy[i].load_reg,vec_memcpy[i].load_addr,vec_memcpy[i].save_reg,vec_memcpy[i].save_addr);
+    // }
     *num_cpy = copy_counter;
     return 0;
 }
