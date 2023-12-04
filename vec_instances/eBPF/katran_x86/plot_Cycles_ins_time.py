@@ -36,11 +36,11 @@ if __name__ == "__main__":
 
     # Data Extraction
 
-    vanila_cycles, vanila_inst, vanila_times = extract_data("logs_hotfix/log_vanila_jit.log")
+    vanila_cycles, vanila_inst, vanila_times = extract_data("logs/log_vanila_jit.log")
 
-    modified_cycles, modified_inst, modified_times = extract_data("logs_hotfix/log_memcpy_jit.log") 
+    modified_cycles, modified_inst, modified_times = extract_data("logs/log_memcpy_jit.log") 
 
-    x86_cycles, x86_inst, x86_times = extract_data("logs_hotfix/log_x86.log")
+    # x86_cycles, x86_inst, x86_times = extract_data("logs/log_x86.log")
     
     # aot_cycles, aot_inst, aot_times = extract_data("logs/log_aot.log")
 
@@ -49,9 +49,9 @@ if __name__ == "__main__":
     keys = [1000000]
 
 
-    cycles = np.array([mean(vanila_cycles), mean(modified_cycles),mean(x86_cycles)])
-    inst = np.array([mean(vanila_inst), mean(modified_inst),mean(x86_inst)])
-    times = np.array([mean(vanila_times), mean(modified_times),mean(x86_times)])
+    cycles = np.array([mean(vanila_cycles), mean(modified_cycles)])
+    inst = np.array([mean(vanila_inst), mean(modified_inst)])
+    times = np.array([mean(vanila_times), mean(modified_times)])
 
     print("times:")
     print(times)
@@ -65,13 +65,13 @@ if __name__ == "__main__":
     #plot
 
     # Data labels and positions
-    labels = ['Vanila', 'Modified', 'X86']
+    labels = ['Vanila', 'Modified']
     x = np.arange(len(labels))
     width = 0.2  # Width of the bars
 
     # Define different colors for the bars
     # colors = ['#0080FF', '#FF007F', '#00CC66', '#CC00CC']
-    colors = ["tab:blue","tab:orange", "tab:green"]
+    colors = ["tab:blue","tab:orange"]
 
     fig, axs = plt.subplots(1, 3, figsize=(12, 4))
 
@@ -106,13 +106,13 @@ if __name__ == "__main__":
 
 
 
-    # labels = ['Vanila', 'Modified']
-    # x = np.arange(len(labels))
-    # width = 0.2  # Width of the bars
+    labels = ['Vanila', 'Modified']
+    x = np.arange(len(labels))
+    width = 0.2  # Width of the bars
 
-    # # Define different colors for the bars
-    # # colors = ['#0080FF', '#FF007F', '#00CC66']
-    # colors = ["tab:blue","tab:orange"]
+    # Define different colors for the bars
+    # colors = ['#0080FF', '#FF007F', '#00CC66']
+    colors = ["tab:blue","tab:orange"]
 
 
 
@@ -144,11 +144,13 @@ if __name__ == "__main__":
     axs[2].legend()
 
     # # Subplot 3: Times
+    labels = ['Vanila', 'Modified']
 
-    # x = np.arange(len(labels))
+    labels = ['Vanila', 'Modified']
+    x = np.arange(len(labels))
     # Define different colors for the bars
     # colors = ['#0080FF', '#FF007F', '#00CC66', '#CC00CC']
-    # colors = ["tab:blue","tab:orange"]
+    colors = ["tab:blue","tab:orange"]
 
 
     axs[3].bar(x, inst/cycles, width, color=colors,zorder=2)

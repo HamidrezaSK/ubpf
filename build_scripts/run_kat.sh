@@ -66,20 +66,20 @@ done
 # done
 
 
-# commands=(
-#   "taskset 0x200 ./vec_instances/eBPF/encap/x86/memcpy_v6_1 vec_instances/eBPF/encap/x86/ipv6_in_1.mem"
-# )
+commands=(
+  "taskset 0x200 ./vec_instances/eBPF/katran_x86/lib/bpf/balancer.x86 ipv6_in.mem"
+)
 
-# # Log file
-# log_file="log_x86.log"
+# Log file
+log_file="log_x86.log"
 
-# rm vec_instances/eBPF/encap/x86/$log_file
-# # Loop to run the commands 5 times and log their return values
-# for command in "${commands[@]}"; do
-#   for i in {1..20}; do
-#     echo "Running: $command"
-#     $command >> "$log_file" 2>&1
-#     $command >> "vec_instances/eBPF/encap/x86/$log_file" 2>&1
-#     echo "--------------------" >> "$log_file"
-#   done
-# done
+rm vec_instances/eBPF/katran_x86/$log_file
+# Loop to run the commands 5 times and log their return values
+for command in "${commands[@]}"; do
+  for i in {1..20}; do
+    echo "Running: $command"
+    $command >> "$log_file" 2>&1
+    $command >> "vec_instances/eBPF/katran_x86/$log_file" 2>&1
+    echo "--------------------" >> "$log_file"
+  done
+done

@@ -82,3 +82,9 @@ cd vec_instances/eBPF/katran/lib/bpf/
 python packet_gen_random.py
 
 cd -
+
+cd vec_instances/eBPF/katran_x86/lib/bpf/
+
+clang -g -I ../../../ -O2 balancer.x86.c -o balancer.x86
+
+cd -

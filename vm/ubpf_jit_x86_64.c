@@ -112,6 +112,15 @@ static int comp_load (const void * elem1, const void * elem2)
     return 0;
 }
 
+static int comp_cpy (const void * elem1, const void * elem2) 
+{
+    int f = ((struct vec_memcpy*)elem1)->start_offset;
+    int s = ((struct vec_memcpy*)elem2)->start_offset;
+    if (f > s) return  1;
+    if (f < s) return -1;
+    return 0;
+}
+
 /* Return the x86 register for the given eBPF register */
 static int
 map_register(int r)
@@ -1976,6 +1985,103 @@ resolve_jumps(struct jit_state* state)
 }
 
 static int
+analyse_memcpy_64(struct ubpf_vm* vm, struct vec_memcpy* vec_memcpy, int *num_cpy)
+{
+    int i;
+    // printf("alo\n");
+    // int count = 0;
+
+    bool load_started = false;
+    // int started_offset = -1;
+    int load_counter = 0;
+    int save_counter = 0;
+
+    int32_t min_imm_ld = INT_MAX;
+    int32_t min_imm_sv = INT_MAX;
+    int copy_counter = *num_cpy;
+    int load_reg = -1;
+    int save_reg = -1;
+
+    for (i = 0; i < vm->num_insts; i++) {
+        struct ebpf_inst inst = ubpf_fetch_instruction(vm, i);
+        int dst = map_register(inst.dst);
+        int src = map_register(inst.src);
+        switch (inst.opcode) {
+        case EBPF_OP_LDXW:
+            if(!load_started)
+            {
+                // printf("we found a potential packed memcpy start at: %d, src: %d, dst: %d, imm: %d \n",i,src,dst,inst.offset);
+                load_started = true;
+                // started_offset = i;
+                load_counter = 1;
+                load_reg = src;
+                min_imm_ld = inst.offset;
+                vec_memcpy[copy_counter].start_offset=i;
+
+                // loads[count].addr_offset = inst.offset;
+                // loads[count].inst_offset = i;
+            }
+            else if(load_counter < 4 && load_counter >= save_counter && src == load_reg)
+            {
+                // printf("This is a load at %d part of the copy started at %d,src: %d, dst: %d, imm: %d \n",i,started_offset,src,dst,inst.offset);
+                load_counter ++;
+                if(inst.offset < min_imm_ld)
+                    min_imm_ld = inst.offset;
+            }
+            break;
+        case EBPF_OP_STXDW:
+            // printf("This is a save at %d\n",i);
+            // printf("conditions: loadstarted: %d, save_counter %d, load_counter  %d",load_started,save_counter, load_counter +1);
+            if(load_started && save_counter + 2 == load_counter)
+            {
+                // printf("This is a save at %d part of the copy started at %d,src: %d, dst: %d, imm: %d \n",i,started_offset,src,dst,inst.offset);
+                // printf("the save address is: %d\n",inst.offset);
+                save_counter+=2;
+                save_reg = dst;
+                if(inst.offset < min_imm_sv)
+                    min_imm_sv = inst.offset;
+            }
+            if (save_counter >= 4 || load_counter >= 4)
+            {
+                load_started = false;
+                vec_memcpy[copy_counter].end_offset=i;
+                vec_memcpy[copy_counter].load_reg=load_reg;
+                vec_memcpy[copy_counter].save_reg=save_reg;
+                vec_memcpy[copy_counter].save_addr=min_imm_sv;
+                vec_memcpy[copy_counter].load_addr=min_imm_ld;
+
+
+                load_counter = 0;
+                save_counter = 0;
+                min_imm_sv = INT_MAX;
+                min_imm_ld = INT_MAX;
+
+                // printf("Copy %d was completed, starting imm for load: %d, starting imm for save: %d, load address is in: %d, save address is in: %d\n",copy_counter,min_imm_ld,min_imm_sv,load_reg,save_reg);
+                copy_counter ++;
+            }
+            break;
+        case EBPF_OP_LSH64_IMM:
+        case EBPF_OP_OR64_REG:
+            break;
+        default:
+            load_started = false;
+            load_counter = 0;
+            save_counter = 0;
+            break;
+        }
+    }
+    qsort (vec_memcpy, copy_counter, sizeof(*vec_memcpy), comp_cpy);      // Sorting the lables
+
+    // for (i = 0; i< copy_counter; i++)
+    // {
+    //     printf("vec copy start at %d, ends at %d, load address in %d reg with offset %d save address in %d reg with offset %d \n",
+    //                                                 vec_memcpy[i].start_offset,vec_memcpy[i].end_offset,vec_memcpy[i].load_reg,vec_memcpy[i].load_addr,vec_memcpy[i].save_reg,vec_memcpy[i].save_addr);
+    // }
+    *num_cpy = copy_counter;
+    return 0;
+}
+
+static int
 analyse_memcpy(struct ubpf_vm* vm, struct vec_memcpy* vec_memcpy, int *num_cpy)
 {
     int i;
@@ -2338,8 +2444,12 @@ ubpf_translate_x86_64(struct ubpf_vm* vm, uint8_t* buffer, size_t* size, char** 
     else if (vanila == 2) // This mode is for vector memcpy 
     {       
         printf("JIT Compilation with Memcpy Optimization...\n");
-          // Finding potential group memcpies that could be done with SIMD opperations (MOVUPS)
+            // Finding potential group memcpies that could be done with SIMD opperations (MOVUPS)
         if (analyse_memcpy(vm, packed_cpy, &num_vec_cpys) < 0) { 
+            goto out;
+        }
+            // Finding potential group memcpies with different patterns that could be done with SIMD opperations (MOVUPS) 
+        if (analyse_memcpy_64(vm, packed_cpy, &num_vec_cpys) < 0) { 
             goto out;
         }
             // Changed JIT translation function (in this version we delete the whole move opperations founded in the analysis function and replace them with MOVUPS)

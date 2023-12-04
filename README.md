@@ -209,6 +209,18 @@ We aim to optimize code at the assembly level. We observe repeated patterns like
       44:	61 23 00 00 00 00 00 00	r3 = *(u32 *)(r2 + 0x0)
       45:	63 31 16 00 00 00 00 00	*(u32 *)(r1 + 0x16) = r3
 ```
+```assembly
+     171:	61 61 22 00 00 00 00 00	r1 = *(u32 *)(r6 + 0x22)
+     172:	67 01 00 00 20 00 00 00	r1 <<= 0x20
+     173:	61 62 1e 00 00 00 00 00	r2 = *(u32 *)(r6 + 0x1e)
+     174:	4f 21 00 00 00 00 00 00	r1 |= r2
+     175:	7b 1a e8 ff 00 00 00 00	*(u64 *)(r10 - 0x18) = r1
+     176:	61 61 1a 00 00 00 00 00	r1 = *(u32 *)(r6 + 0x1a)
+     177:	67 01 00 00 20 00 00 00	r1 <<= 0x20
+     178:	61 62 16 00 00 00 00 00	r2 = *(u32 *)(r6 + 0x16)
+     179:	4f 21 00 00 00 00 00 00	r1 |= r2
+     180:	7b 1a e0 ff 00 00 00 00	*(u64 *)(r10 - 0x20) = r1
+```
 Our goal is to identify these patterns and replace them with SIMD operations.
 
 ## Other Usecases
